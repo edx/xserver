@@ -1,0 +1,5 @@
+#!/bin/csh
+
+touch LOG
+kill -9 `cat pyxserver.pid`
+nohup nice python pyxserver.py >>& LOG &
