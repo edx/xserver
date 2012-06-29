@@ -431,7 +431,7 @@ def check(context,code,tests,dosubmit=False,answer_select=None):
             # generate output if out code had a bug
             if ce:
                 s += "<p/>oops, our code produced an error:"
-                s += "<blockquote><pre>%s</pre></blockquote>" % ce
+                s += "<blockquote><pre>%s</pre></blockquote>" % ce.replace('<','&lt;')
 
             #if dosubmit:
             #    s += "<p/>" + co
@@ -445,6 +445,7 @@ def check(context,code,tests,dosubmit=False,answer_select=None):
                 estr = clean_error(sce)
                 #error_line_numbers += lnums
                 s += '<p/><font color="red">Error! If no error message follows, check for infinite loops.</font>\n'
+                estr = estr.replace('<','&lt;')
                 s += '<p/><pre>' + estr + '</pre>'
                 
             #s += '<blockquote><pre>%s\n%s</blockquote>' % (sco,solog)
