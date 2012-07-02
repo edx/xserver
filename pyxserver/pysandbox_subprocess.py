@@ -17,7 +17,7 @@ def mangle_code(code,argv):
 
     # mangle code to change os.getenv(foo) to ENV[foo]
     code = re.sub('os\.getenv\(([a-z0-9\'\"]+)\)','ENV[\\1]',code)
-    code = re.sub("os\.fdopen\(3,'w'\)",'log_output',code)
+    code = re.sub("os\.fdopen\(3,'w'\)",'LOG_OUTPUT',code)
 
     # remove import os
     code = code.replace('import os','')
@@ -34,7 +34,7 @@ def mangle_code(code,argv):
 
     # check for malicious statements
     x = code.replace(' ','')
-    x = re.sub("os\.fdopen\(3,'w'\)",'log_output',x)	# fdopen(3.. is ok
+    x = re.sub("os\.fdopen\(3,'w'\)",'LOG_OUTPUT',x)	# fdopen(3.. is ok
 
     if (x.count('/etc/passwd')
         or x.count('importsystem') 
@@ -45,11 +45,11 @@ def mangle_code(code,argv):
 
     #head = "import sys\noldpath = sys.path\nsys.path = ['/usr/lib/python2.6','/home/tutor2/tutor/python_lib/lib601']\n\n"
     head = "import sys\noldpath = sys.path\nsys.path = ['/usr/lib/python2.6','/home/tutor2/tutor/python_lib/lib601','/home/tutor2/tutor/python_lib']\n\n"
-    head += "from cStringIO import StringIO\nlog_output = StringIO()\n\n"
+    head += "from cStringIO import StringIO\nLOG_OUTPUT = StringIO()\n\n"
     head += "ENV = %s\n\n" % repr(argv)
     
     footer = "\n\nprint \"!LOGOUTPUT\"\n"
-    footer += "print log_output.getvalue()\n"
+    footer += "print LOG_OUTPUT.getvalue()\n"
     code = head + code + footer
     return code, True
 
@@ -75,8 +75,9 @@ def sandbox_run_code(code,argv):
         return('','BAD CODE - this will be logged','')
     
     # mangle code to change os.getenv(foo) to ENV[foo]
+    code = re.sub('os\.environ','ENV',code)
     code = re.sub('os\.getenv\(([a-z0-9\'\"]+)\)','ENV[\\1]',code)
-    code = re.sub("os\.fdopen\(3,'w'\)",'log_output',code)
+    code = re.sub("os\.fdopen\(3,'w'\)",'LOG_OUTPUT',code)
 
     # remove import os
     code = code.replace('import os','')

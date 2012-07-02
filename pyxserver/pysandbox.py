@@ -417,13 +417,16 @@ def check(context,code,tests,dosubmit=False,answer_select=None):
             for k in argset:
                 runenv['argv%d' % argc] = k
                 argc += 1
+            runenv['argv'] = ['pyxserv'] + argset
     
             # s += '<li> t="%s"' % t
     
             # for each test case, generate 10 random integers, which may be used as private
             # information between the testing of the student's code and testing of our code
-            rndlist = string.join(['%d' % random.randint(0,(1<<16)-1) for k in range(10)],',')
+            rndset = [ random.randint(0,(1<<16)-1) for k in range(10) ]
+            rndlist = string.join(['%d' % k for k in rndset],',')
             runenv['rndlist'] = rndlist
+            runenv['rndset'] = rndset
                 
             (sco,sce,solog) = sandbox_run_code(code_provided,runenv)            # run student's code
             (co,ce,olog) = sandbox_run_code(code_expected,runenv)             # run our code
