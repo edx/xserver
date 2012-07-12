@@ -1,0 +1,6 @@
+Two programs are contained in this directory:
+	1) Django server for handling xqueue HTTP server (run.sh)
+	2) Python app for consuming requests (queue/queue_multiplereceive.py)
+
+Dependencies on AWS Ubuntu:
+	pip, django, requests, rabbitMQ, gcc, python-dev, libxml2-dev, libxslt1-dev, lxml
