@@ -16,7 +16,7 @@ class SingleChannel(threading.Thread):
 		self.workerURL = queue_common.WORKER_URLS[workerID]
 
 	def run(self):
-		print ' [%d] Starting worker %d at %s' % (self.workerID, self.workerID, self.workerURL)
+		print ' [%d] Starting thread for worker %d at %s' % (self.workerID, self.workerID, self.workerURL)
 		connection = pika.BlockingConnection(
 						pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
 		channel = connection.channel()
@@ -48,9 +48,11 @@ class SingleChannel(threading.Thread):
 
 	def _post_to_lms(self, header, rstr):
 		# NOTE: hard-coded to my LMS sandbox
-		return_url = 'http://18.189.69.130:8000' + header['return_url'] + 'lms_update'
-		payload = header
-		payload.update({'response': rstr})
+		dispatch = 'score_update'
+		return_url = 'http://18.189.69.130:8000' + header['return_url'] + dispatch
+		payload = { queue_common.HEADER_TAG: json.dumps(header),
+					'response': rstr,
+				  }
 		requests.post(return_url, data=payload)
 		print ' [%d] Job done. Results sent to %s' % (self.workerID, return_url)
 
@@ -71,7 +73,7 @@ def main():
 	if num_workers > 0:
 		channels[0].join() # Wait forever. To do: Trap Ctrl+C
 	else:
-		print ' [*] No workers. Abort'
+		print ' [*] No workers. Exit'
 
 if __name__ == '__main__':
 	main()
