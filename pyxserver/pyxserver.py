@@ -177,7 +177,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
 def main():
     try:
-        server = HTTPServer(('', 8889), MyHandler)
+        server = HTTPServer(('', 80), MyHandler)
         print 'started httpserver...'
         server.serve_forever()
     except KeyboardInterrupt:
