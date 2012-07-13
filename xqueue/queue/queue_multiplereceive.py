@@ -4,7 +4,6 @@ import threading
 import requests
 import pika
 import json
-from lxml import etree
 
 #------------------------------------------------------------
 # Encapsulation of a single RabbitMQ connection and
@@ -32,7 +31,7 @@ class SingleChannel(threading.Thread):
 			( self.workerID, queue_common.RABBIT_QUEUE_NAME, self.workerURL )
 		work = json.loads(body)
 		header = json.loads(work.pop(queue_common.HEADER_TAG))
-		
+
 		# Send task to external server synchronously
 		try:
 			r = requests.post(self.workerURL, data=work)
@@ -47,13 +46,13 @@ class SingleChannel(threading.Thread):
 		# Send job acknowledgement to queue 
 		ch.basic_ack(delivery_tag = method.delivery_tag)
 
-	# This is currently a placeholder for writing back to LMS
-	#------------------------------------------------------------
 	def _post_to_lms(self, header, rstr):
-		returnURL = 'http://18.189.69.130:8000' # NOTE: hard-coded to my LMS sandbox
+		# NOTE: hard-coded to my LMS sandbox
+		return_url = 'http://18.189.69.130:8000' + header['return_url'] + 'lms_update'
 		payload = header
 		payload.update({'response': rstr})
-		requests.post(returnURL+'/modx2/', data=payload)
+		requests.post(return_url, data=payload)
+		print ' [%d] Job done. Results sent to %s' % (self.workerID, return_url)
 
 #------------------------------------------------------------
 # Instantiate RabbitMQ consumers corresponding 1:1 with
@@ -69,7 +68,10 @@ def main():
 		channels[wid] = SingleChannel(wid)
 		channels[wid].start()
 		
-	channels[0].join() # Wait forever. To do: Trap Ctrl+C, not assume num_workers > 0
+	if num_workers > 0:
+		channels[0].join() # Wait forever. To do: Trap Ctrl+C
+	else:
+		print ' [*] No workers. Abort'
 
 if __name__ == '__main__':
 	main()
