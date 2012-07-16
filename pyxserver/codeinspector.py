@@ -40,7 +40,7 @@ class Code_Inspector(Bdb):
         that variable's changes (it takes a list of values) and registers that function 
         so that it will eventually recieve the appropriate input.
         """
-        self.code_file.seek(0)c
+        self.code_file.seek(0)
         tracker = VariableTracker(variable, inspect_variable_changes)
         self.variable_trackers.append(tracker)
         lineno = 0
@@ -100,7 +100,8 @@ class VariableTracker:
 
         return max([self.analyzer(values) for values in self.matrix.values()])     
 
-mock_code = """
+if __name__ == "__main__":
+    mock_code = """
 def calc_payments(balance, interest):
     lower = balance/12
     upper = (balance * (1+interest/12)**12)/12
@@ -119,22 +120,22 @@ def calc_payments(balance, interest):
     return payment
 """
 
-def inspect_function(values):
-    diff = -1 #all new assignments will keep diff positive
-    if (len(values)<3):
-        return False
-    for i in range(1, len(values)-1):
-        old_diff = diff
-        diff = abs(values[i]-values[i-1])
-        if diff < .001 or (old_diff > 0 and diff > .55*old_diff):
+    def inspect_function(values):
+        diff = -1 #all new assignments will keep diff positive
+        if (len(values)<3):
             return False
-    return True
+        for i in range(1, len(values)-1):
+            old_diff = diff
+            diff = abs(values[i]-values[i-1])
+            if diff < .001 or (old_diff > 0 and diff > .55*old_diff):
+                return False
+        return True
 
-with Code_Inspector(mock_code) as my_ci:
-    my_ci.inspect_variable("payment", inspect_function)
-    print my_ci.inspect_dispatch("calc_payments(3500000, .01)")
+    with Code_Inspector(mock_code) as my_ci:
+        my_ci.inspect_variable("payment", inspect_function)
+        print my_ci.inspect_dispatch("calc_payments(3500000, .01)")
 
-mock_code = """
+    mock_code = """
 def calc_payments(balance, interest):
     payment = 0
     monthly_interest = interest/(12.0)
@@ -148,6 +149,6 @@ def calc_payments(balance, interest):
     return payment
         
 """ 
-with Code_Inspector(mock_code) as my_ci:
-    my_ci.inspect_variable("payment", inspect_function)
-    print my_ci.inspect_dispatch("calc_payments(3500, .01)")
+    with Code_Inspector(mock_code) as my_ci:
+        my_ci.inspect_variable("payment", inspect_function)
+        print my_ci.inspect_dispatch("calc_payments(3500, .01)")

@@ -30,6 +30,7 @@ import random
 
 import showhide
 from util import *
+from style_guide import check_static_style_guide
 
 #-----------------------------------------------------------------------------
 # import one sanbox python sub-module
@@ -114,6 +115,12 @@ def do_input_check(penv,code_provided):
     """
     (isok,msg) = code_has_suspicious_statements(code_provided)
     if not isok:
+        return msg
+
+
+    print "AGHIUERNIBUNNBFULGIYBNLSKJDNLSKDJNVLIRJNLSDKJVNSLKFDJNVBULDJHNLKEJNVSLKJVNLDFJHBNLDJRHBILUBNVLKDFJBVNDLKFJN"
+    msg = check_static_style_guide(code_provided)
+    if msg:
         return msg
 
     if penv.has_key('input_check'):
@@ -431,7 +438,7 @@ def check(context,code,tests,dosubmit=False,answer_select=None):
             (sco,sce,solog) = sandbox_run_code(code_provided,runenv)            # run student's code
             (co,ce,olog) = sandbox_run_code(code_expected,runenv)             # run our code
     
-            # generate output if out code had a bug
+            # generate output if our code had a bug
             if ce:
                 s += "<p/>oops, our code produced an error:"
                 s += "<blockquote><pre>%s</pre></blockquote>" % ce.replace('<','&lt;')

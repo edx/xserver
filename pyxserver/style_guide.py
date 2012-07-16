@@ -13,8 +13,9 @@ def strip_comments(code):
 def check_booleans(code):
     code = strip_comments(code)
     regex = re.search('==\s*True|==\s*False', code)
-    return "Comparison to boolean found at " + str(regex.start())
-
+    if regex:
+        return "Comparison to boolean found at " + str(regex.start())
+    return False
 def check_docstring(code):
     code = strip_comments(code)
     code = code.splitlines()
@@ -118,12 +119,15 @@ def check_super_usage(code):
 def check_static_style_guide(code):
     ans = False
     ans = ans or check_booleans(code)
-    ans = ans or check_docsring(code)
+    ans = ans or check_docstring(code)
     ans = ans or check_changing_collection(code)
     ans = ans or check_super_usage(code)
     return ans
 
-answer = """
+if __name__ == '__main__':
+    print "testing style guide"
+    
+    answer = """
 def calc_payments(balance, interest):
     \"\"\"
     contains a docstring
@@ -140,18 +144,18 @@ def calc_payments(balance, interest):
     return payment
         
 """ 
-if check_docstring(answer):
-    print "error! 1"
+    if check_docstring(answer):
+        print "error! 1"
 
-my_test_string = "if a == False:   return 7"
-if not isinstance(check_booleans(my_test_string), str):
-    print "error! 2"
+    my_test_string = "if a == False:   return 7"
+    if not isinstance(check_booleans(my_test_string), str):
+        print "error! 2"
 
 
-if check_changing_collection(answer):
-    print "error! 3"
+    if check_changing_collection(answer):
+        print "error! 3"
 
-answer = """
+    answer = """
 def calc_payments(balance, interest):
     \"\"\"
     contains a docstring
@@ -163,10 +167,10 @@ def calc_payments(balance, interest):
     return elems
 """ 
 
-if not isinstance( check_changing_collection(answer), str):
-    print "error! 4"
+    if not isinstance( check_changing_collection(answer), str):
+        print "error! 4"
 
-answer = """
+    answer = """
 def calc_payments(balance, interest):
     \"\"\"
     contains a docstring
@@ -178,10 +182,10 @@ def calc_payments(balance, interest):
     return elems
 """ 
 
-if check_changing_collection(answer):
-    print "error! 5"
+    if check_changing_collection(answer):
+        print "error! 5"
 
-incorrect_inheritance = """
+    incorrect_inheritance = """
 class SimpleVirus(object):
     def __init__(self, maxBirthProb, clearProb):
         self.maxBirthProb = maxBirthProb
@@ -195,7 +199,7 @@ class ResistantVirus(SimpleVirus):
         self.mutProb = mutProb
 """
 
-correct_inheritance = """
+    correct_inheritance = """
 class SimpleVirus(object):
     def __init__(self, maxBirthProb, clearProb):
         self.maxBirthProb = maxBirthProb
@@ -208,7 +212,7 @@ class ResistantVirus(SimpleVirus):
         self.mutProb = mutProb
 """
 
-if check_super_usage(correct_inheritance):
-    print "error! 6"
-if not isinstance(check_super_usage(incorrect_inheritance), str):
-    print "error! 7"
+    if check_super_usage(correct_inheritance):
+        print "error! 6"
+    if not isinstance(check_super_usage(incorrect_inheritance), str):
+        print "error! 7"
