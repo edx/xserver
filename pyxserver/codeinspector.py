@@ -2,6 +2,7 @@ from bdb import Bdb, Breakpoint
 import tempfile, sys, os, shutil
 
 class Code_Inspector(Bdb):
+    """Code_Inspector provides an interface for programmatically analysing running code """
 
     def __init__(self, student_source):
         """ Takes a string of source code """
