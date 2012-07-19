@@ -2,6 +2,7 @@
 import re
 
 def strip_comments(code):
+    """ returns a version of the code without any comments"""
     codeLines = code.splitlines()
     newCode = ''
     for line in codeLines:
@@ -11,12 +12,14 @@ def strip_comments(code):
     return newCode
 
 def check_booleans(code):
+    """ returns a string if the code contains trivial boolean checks, False otherwise """
     code = strip_comments(code)
     regex = re.search('==\s*True|==\s*False', code)
     if regex:
         return "Comparison to boolean found at " + str(regex.start())
     return False
 def check_docstring(code):
+    """ returns a string if there exist functions without docstrings in the code, False otherwise"""
     code = strip_comments(code)
     code = code.splitlines()
     # find bracketed expressions
@@ -32,6 +35,8 @@ def check_docstring(code):
     return False
 
 def count_leading_whitespace(line):
+    """ returns the number of whitespace characters that a line begins with
+    can be used for determining indent size for parsing python functions """
     indent_size = 0
     for char in line:
         if char.isspace():
@@ -41,6 +46,7 @@ def count_leading_whitespace(line):
     return indent_size
 
 def check_changing_collection(code):
+    """ returns a string if a collection is being changed in the middle of a for loop. Otherwise, returns False"""
     altering_methods = [".append", ".extend", ".insert", ".remove", ".pop", ".sort"]
     code = strip_comments(code)
     code = code.splitlines()
@@ -71,6 +77,7 @@ def check_changing_collection(code):
 
 
 def check_super_usage(code):
+    """returns a string if there is a subclass using a string subset of a superclass's __init__ method"""
     code = strip_comments(code)
     code = code.splitlines()
     classes = []
@@ -117,6 +124,7 @@ def check_super_usage(code):
     return False
 
 def check_static_style_guide(code):
+    """checks all of the style guide functions and returns a string if it fails any of them. Otherwise, returns false"""
     ans = False
     ans = ans or check_booleans(code)
     ans = ans or check_docstring(code)

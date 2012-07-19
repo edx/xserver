@@ -4,12 +4,14 @@ import tempfile, sys, os, shutil
 class Code_Inspector(Bdb):
 
     def __init__(self, student_source):
+        """ Takes a string of source code """
         Bdb.__init__(self)
         self.student_source = student_source
         self.variable_trackers = []
         self.exec_env={}
         
     def __enter__(self):
+        """ called in the beginning of the execution of a 'with' statment"""
         code_file_name = tempfile.mkstemp(suffix=".py")[1]
         self.code_file = open(code_file_name, 'w+')
         self.code_file.write(self.student_source)
@@ -18,6 +20,7 @@ class Code_Inspector(Bdb):
         return self
         
     def __exit__(self, type, value, traceback):
+        """ called at the end of the execution of a 'with' statment"""
         self.code_file.close()
         os.remove(self.code_file.name)
 
@@ -29,19 +32,21 @@ class Code_Inspector(Bdb):
                 breakpoint.inspection_function(frame)
 
     def set_env(self, dict):
+        """ sets the environment as the provided dictionary when an inspection is dispatched"""
         self.exec_env.update(dict)
 
     def inspect_line(self, lineno, inspect_frame):
         """
-        sets a breakpoint at filename, lineno and a function (which takes a frame) to execute on
+        sets a breakpoint at a lineno corresponding to the student_source and a function (which takes a frame) to execute on
         the frame when that breakpoint is hit
         """
         self.set_break(self.code_file.name, lineno).inspection_function = inspect_frame
 
     def inspect_variable(self, variable, inspect_variable_changes):
         """
-        takes a variable of interest and a function describing out to think about
-        that variable's changes (it takes a list of values) and registers that function 
+        takes a variable of interest as a String and a function that takes a list of values. That function
+        should return True or False depending on whether that variable's changes are appropriate. 
+        This method will then register that function 
         so that it will eventually recieve the appropriate input.
         """
         self.code_file.seek(0)
@@ -53,10 +58,10 @@ class Code_Inspector(Bdb):
             if variable in line:
                 self.inspect_line(lineno, tracker.recieve_variable_call) 
 
-    # Largely copy-pasted from the Bdb implementation, but returns a reference to the 
-    # breakpoint it just made rather than dropping it.
     def set_break(self, filename, lineno, temporary=0, cond = None,
                   funcname=None):
+        """sets a breakpoint at the appropriate line. It is largely copy-pasted from the bdb implementation, 
+        but returns a reference to the breakpoint it just made rather than dropping it """
         filename = self.canonic(filename)
         import linecache # Import as late as possible
         line = linecache.getline(filename, lineno)
@@ -72,7 +77,7 @@ class Code_Inspector(Bdb):
 
     def inspect_dispatch(self, function_call=None):
         """
-        dispatches all of the inspection that has been set up and returns 
+        dispatches all of the inspection functions that have been set up and returns 
         the results of each of those inspections. 
         """
         if function_call:
@@ -90,6 +95,10 @@ class VariableTracker:
     Used to track a single variable which might be present on many different lines
     """
     def __init__(self, variable, analyzer):
+        """ takes a string representing a variable of interest and a function which 
+        takes a list of values
+        """
+
         self.matrix = {}
         self.analyzer = analyzer
         self.var = variable
@@ -103,6 +112,9 @@ class VariableTracker:
             self.matrix[frame.f_lineno].append(frame.f_locals[self.var])
 
     def determine_value(self):
+        """
+        a determines a final result when a variable appears on many lines
+        """
         if not self.matrix.values(): return [False]
         return max([self.analyzer(values) for values in self.matrix.values()])     
 
