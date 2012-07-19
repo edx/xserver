@@ -240,10 +240,8 @@ def AssembleCode(penv,student_code_fragment,answer_select=None):
 
     code_expected = mangle_tutor1_python(ImportTUTCode(preamble + expected + tprog))
     code_provided = mangle_tutor1_python(ImportTUTCode(preamble + student_code_fragment + tprog))
-    sanitized_expected = mangle_tutor1_python(ImportTUTCode(expected))
-    sanitized_provided = mangle_tutor1_python(ImportTUTCode(student_code_fragment))
-
-    return code_expected, code_provided, initial_code, sanitized_expected, sanitized_provided 
+    
+    return code_expected, code_provided, initial_code 
 
 #-----------------------------------------------------------------------------
 # Tutor2 function to turn string of tests to list of tests
@@ -316,7 +314,7 @@ def check(context,code,tests,dosubmit=False,answer_select=None):
                 return firstret		# no answer matched; return the first
 
     # assemble expected and provided code for testing
-    (code_expected, code_provided, initial_code, sanitized_expected, sanitized_provided) = AssembleCode(penv,code,answer_select)
+    (code_expected, code_provided, initial_code) = AssembleCode(penv,code,answer_select)
 
     # run the input-check function if it exists in the processor environment
     # this is used, for example, to check if the code provided has a specific string, 
@@ -434,11 +432,8 @@ def check(context,code,tests,dosubmit=False,answer_select=None):
             rndlist = string.join(['%d' % k for k in rndset],',')
             runenv['rndlist'] = rndlist
             runenv['rndset'] = rndset
-            runenv['answer'] = sanitized_provided
                 
             (sco,sce,solog) = sandbox_run_code(code_provided,runenv)            # run student's code
-            
-            runenv['answer'] = sanitized_expected
             (co,ce,olog) = sandbox_run_code(code_expected,runenv)             # run our code
     
             # generate output if our code had a bug

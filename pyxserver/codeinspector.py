@@ -7,6 +7,7 @@ class Code_Inspector(Bdb):
         Bdb.__init__(self)
         self.student_source = student_source
         self.variable_trackers = []
+        self.exec_env={}
         
     def __enter__(self):
         code_file_name = tempfile.mkstemp(suffix=".py")[1]
@@ -26,7 +27,10 @@ class Code_Inspector(Bdb):
         if breakpoints:
             for breakpoint in breakpoints:
                 breakpoint.inspection_function(frame)
-    
+
+    def set_env(self, dict):
+        self.exec_env.update(dict)
+
     def inspect_line(self, lineno, inspect_frame):
         """
         sets a breakpoint at filename, lineno and a function (which takes a frame) to execute on
@@ -66,13 +70,16 @@ class Code_Inspector(Bdb):
             list.append(lineno)
         return Breakpoint(filename, lineno, temporary, cond, funcname)
 
-    def inspect_dispatch(self, function_call):
+    def inspect_dispatch(self, function_call=None):
         """
         dispatches all of the inspection that has been set up and returns 
         the results of each of those inspections. 
         """
-        student_code = __import__(os.path.basename(self.code_file.name[:-3]))
-        self.run("student_code."+function_call, locals = locals())
+        if function_call:
+            student_code = __import__(os.path.basename(self.code_file.name[:-3]))
+            self.run("student_code."+function_call, self.exec_env)
+        else:
+            self.run("execfile('"+self.code_file.name+"')", self.exec_env)
         ans = []
         for tracker in self.variable_trackers:
             ans.append(tracker.determine_value())
@@ -96,6 +103,7 @@ class VariableTracker:
             self.matrix[frame.f_lineno].append(frame.f_locals[self.var])
 
     def determine_value(self):
+        if not self.matrix.values(): return False
         return max([self.analyzer(values) for values in self.matrix.values()])     
 
 if __name__ == "__main__":
