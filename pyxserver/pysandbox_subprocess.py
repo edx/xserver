@@ -12,6 +12,7 @@ import subprocess
 import re
 import resource
 import os
+import pyxserver_config
 
 def mangle_code(code,argv):
 
@@ -44,7 +45,7 @@ def mangle_code(code,argv):
         return code, False
 
     #head = "import sys\noldpath = sys.path\nsys.path = ['/usr/lib/python2.6','/home/tutor2/tutor/python_lib/lib601']\n\n"
-    head = "import sys\noldpath = sys.path\nsys.path = ['/usr/lib/python2.6','/home/ec2-user/python_lib']\n\n"
+    head = "import sys\noldpath = sys.path\nsys.path = ['/usr/lib/python2.6', '%s']\n\n" % pyxserver_config.PYXSERVER_LIB_PATH
     head += "from cStringIO import StringIO\nLOG_OUTPUT = StringIO()\n\n"
     head += "ENV = %s\n\n" % repr(argv)
     
