@@ -103,7 +103,7 @@ class VariableTracker:
             self.matrix[frame.f_lineno].append(frame.f_locals[self.var])
 
     def determine_value(self):
-        if not self.matrix.values(): return False
+        if not self.matrix.values(): return [False]
         return max([self.analyzer(values) for values in self.matrix.values()])     
 
 if __name__ == "__main__":
