@@ -118,16 +118,18 @@ def do_input_check(penv,code_provided):
     if not isok:
         return msg
 
-    try:
-        msg = check_static_style_guide(code_provided)
-        if msg:
-            return msg
-    except Exception as err:
-        if 1: 	# TODO: make this 'DEBUG' in penv:
-            msg = "Oops, our code inspector failed in check_static_style_guide! Error:"
-            msg += "<pre>%s</pre>" % str(err).replace('<','&lt;')
-            msg += "Traceback: <pre>%s</pre>" % traceback.format_exc().replace('<','&lt;')
-            return msg
+    # the style check is only done if DO_STYLE_CHECK is defined in the script
+    if 'DO_STYLE_CHECK' in penv:
+        try:
+            msg = check_static_style_guide(code_provided)
+            if msg:
+                return msg
+        except Exception as err:
+            if 1: 	# TODO: make this 'DEBUG' in penv:
+                msg = "Oops, our code inspector failed in check_static_style_guide! Error:"
+                msg += "<pre>%s</pre>" % str(err).replace('<','&lt;')
+                msg += "Traceback: <pre>%s</pre>" % traceback.format_exc().replace('<','&lt;')
+                return msg
 
     if penv.has_key('input_check'):
         incheck = penv['input_check']
