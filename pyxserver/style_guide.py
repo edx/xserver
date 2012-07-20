@@ -22,16 +22,18 @@ def check_docstring(code):
     """ returns a string if there exist functions without docstrings in the code, False otherwise"""
     code = strip_comments(code)
     code = code.splitlines()
+    lineno = 0
     # find bracketed expressions
     code_iter = code.__iter__()
     for line in code_iter:
+        lineno += 1
         if line.find('def')>=0:
             try:
                 line = code_iter.next()
             except StopIteration:
                 break
             if not line.find("\"\"\"")>=0:
-                return "No docstring found at "+ line
+                return "No docstring found at "+ lineno
     return False
 
 def count_leading_whitespace(line):
