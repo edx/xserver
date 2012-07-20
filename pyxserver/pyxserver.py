@@ -14,6 +14,7 @@ from os import curdir, sep
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import pysandbox
 from lxml import etree
+import pyxserver_config
 
 #-----------------------------------------------------------------------------
 # debugging
@@ -177,7 +178,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
 def main():
     try:
-        server = HTTPServer(('', 8889), MyHandler)
+        server = HTTPServer(('', pyxserver_config.PYXSERVER_PORT), MyHandler)
         print 'started httpserver...'
         server.serve_forever()
     except KeyboardInterrupt:

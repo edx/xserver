@@ -1,0 +1,2 @@
+PYXSERVER_PORT = 80
+PYXSERVER_LIB_PATH = '../python_lib'
