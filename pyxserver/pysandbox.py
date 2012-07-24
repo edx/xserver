@@ -470,6 +470,9 @@ def check(context,code,tests,dosubmit=False,answer_select=None):
 
             #s += '<blockquote><pre>%s</blockquote>' % (solog)
 
+            # remove control characters from student log output
+            solog = re.sub(r"[\x01-\x09\x7f]", "", solog)
+
             # escape HTML characters in return string
             s += '<blockquote><pre>%s</pre></blockquote>' % (solog.replace('&','&amp;').replace('<','&lt;'))
 
