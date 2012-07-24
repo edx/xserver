@@ -11,7 +11,7 @@
 #------------------------------------------------------------
 
 import json
-from time import localtime, strftime, sleep
+from time import localtime, strftime 
 from urlparse import parse_qs
 
 import pyxserver
