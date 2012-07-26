@@ -7,14 +7,18 @@ def is_valid_request(get):
 	#	associated with the key HEADER_TAG
 	return get.has_key(queue_common.HEADER_TAG)
 
-def push_to_queue(get=None):
+def get_queue_name(get):
+	header = json.loads(get[queue_common.HEADER_TAG])
+	return str(header['queue_name'])
+
+def push_to_queue(queue_name, get=None):
 	connection = pika.BlockingConnection(pika.ConnectionParameters(
 		host=queue_common.RABBIT_HOST))
 	channel = connection.channel()
-	q = channel.queue_declare(queue=queue_common.RABBIT_QUEUE_NAME)
+	q = channel.queue_declare(queue=queue_name, durable=True)
 	if get is not None:
 		channel.basic_publish(exchange='',
-			routing_key=queue_common.RABBIT_QUEUE_NAME,
+			routing_key=queue_name,
 			body=json.dumps(get),
 			properties=pika.BasicProperties(delivery_mode=2),
 			)

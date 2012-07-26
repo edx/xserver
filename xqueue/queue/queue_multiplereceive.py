@@ -1,34 +1,37 @@
 #!/usr/bin/env python
-import queue_common
-import threading 
-import requests
-import pika
 import json
+import pika
+import requests
+import sys
+import threading 
+
+import queue_common
 
 #------------------------------------------------------------
 # Encapsulation of a single RabbitMQ connection and
 #	channel per thread
 #------------------------------------------------------------
 class SingleChannel(threading.Thread):
-	def __init__(self, workerID):
+	def __init__(self, workerID, queue_name):
 		threading.Thread.__init__(self)
 		self.workerID = workerID
 		self.workerURL = queue_common.WORKER_URLS[workerID]
+		self.queue_name = queue_name
 
 	def run(self):
-		print ' [%d] Starting thread for worker %d at %s' % (self.workerID, self.workerID, self.workerURL)
+		print " [%d] Starting thread for queue '%s' at %s" % (self.workerID, self.queue_name, self.workerURL)
 		connection = pika.BlockingConnection(
 						pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
 		channel = connection.channel()
-		channel.queue_declare(queue=queue_common.RABBIT_QUEUE_NAME)
+		channel.queue_declare(queue=self.queue_name, durable=True)
 		channel.basic_qos(prefetch_count=1)
 		channel.basic_consume(self._callback,
-							  queue=queue_common.RABBIT_QUEUE_NAME)
+							  queue=self.queue_name)
 		channel.start_consuming()
 		
 	def _callback(self, ch, method, properties, body):
 		print ' [%d] Got work from %s, dispatched to %s' %\
-			( self.workerID, queue_common.RABBIT_QUEUE_NAME, self.workerURL )
+			( self.workerID, self.queue_name, self.workerURL )
 		work = json.loads(body)
 		header = json.loads(work.pop(queue_common.HEADER_TAG))
 
@@ -61,13 +64,21 @@ class SingleChannel(threading.Thread):
 #	each worker server
 #------------------------------------------------------------
 def main():
+	if (len(sys.argv) > 1):
+		queue_name = sys.argv[1]
+		if queue_name not in queue_common.QUEUES:
+			print " [!] ERROR: Queue name '%s' not in list of queues. See queue_common.py" % queue_name
+			return
+	else:
+		queue_name = queue_common.QUEUES[0]
+
 	print ' [*] Starting handlers for %s (%s). Press CTRL+C to exit' %\
 		(queue_common.SERVER_NAME, queue_common.SERVER_DESC)
 
 	num_workers = len(queue_common.WORKER_URLS)
 	channels = [None]*num_workers
 	for wid in range(num_workers):
-		channels[wid] = SingleChannel(wid)
+		channels[wid] = SingleChannel(wid, queue_name) # TODO: Set which queue to listen to
 		channels[wid].start()
 		
 	if num_workers > 0:
