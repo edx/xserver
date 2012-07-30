@@ -11,12 +11,10 @@
 #		uwsgi --socket 127.0.0.1:3031 --wsgi-file /path/to/pyxserver_wsgi.py --processes 4
 #	gunicorn:
 #		gunicorn -w 4 -b 127.0.0.1:3031 pyxserver_wsgi:application
-#
 #------------------------------------------------------------
 
 import json
 from time import localtime, strftime 
-from urlparse import parse_qs
 
 import pyxserver
 
@@ -24,18 +22,18 @@ def do_GET(data):
 	return "Hey, the time is %s" % strftime("%a, %d %b %Y %H:%M:%S", localtime())
 
 def do_POST(data):
-	post = parse_qs(data) # Dict
+	post = json.loads(data) # Graders expect serialized data
 
 	# Parse ExternalResponse interface
-	cmd = str(post['edX_cmd'][0]).strip()
-	tests = post['edX_tests'][0]
-	processor = post['processor'][0].strip()
+	cmd = post['edX_cmd']
+	tests = post['edX_tests']
+	processor = post['processor']
 	print ' [*] cmd: %s' % cmd
 	#print ' [*] tests: %s' % tests
 	#print ' [*] processor: %s' % processor
 	
 	if cmd == 'get_score':
-		student_response = json.loads(post['edX_student_response'][0])[0]
+		student_response = post['edX_student_response']
 		award, message = pyxserver.run_code_sandbox(processor, student_response, tests)
 
 		reply_template = "<edxgrade><awarddetail>%s</awarddetail><message><![CDATA[%s]]></message><awarded></awarded></edxgrade>"
