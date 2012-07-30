@@ -18,10 +18,10 @@ DATABASES = {
 #        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
 #        'NAME': 'xqueue.sqlite',                      # Or path to database file if using sqlite3.
 		'ENGINE': 'django.db.backends.mysql',
-		'NAME': 'testdb',
+		'NAME': 'xqueue',
         'USER': 'kimth',
         'PASSWORD': 'password',
-        'HOST': 'test.cl0iwjvwuiai.us-east-1.rds.amazonaws.com',
+        'HOST': 'xqueue.cl0iwjvwuiai.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
