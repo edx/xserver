@@ -25,6 +25,3 @@ def push_to_queue(queue_name, get=None):
 	connection.close()
 	return q.method.message_count
 
-def compose_reply(reply):
-	return '<xqueue><server name="%s" desc="%s"/><msg>%s</msg></xqueue>' %\
-				(queue_common.SERVER_NAME, queue_common.SERVER_DESC, reply)

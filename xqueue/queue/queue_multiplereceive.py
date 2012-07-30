@@ -42,7 +42,7 @@ class SingleChannel(threading.Thread):
 			msg = 'Error %s - cannot connect to worker at %s' % (err, self.workerURL)
 			raise Exception(msg)
 
-		# Decide if the response from the worker node is satisfactory.
+		# TODO: Decide if the response from the worker node is satisfactory.
 		#	If yes, send back to the LMS
 		self._post_to_lms(header, r.text)
 
@@ -59,10 +59,6 @@ class SingleChannel(threading.Thread):
 		requests.post(return_url, data=payload)
 		print ' [%d] Job done. Results sent to %s' % (self.workerID, return_url)
 
-#------------------------------------------------------------
-# Instantiate RabbitMQ consumers corresponding 1:1 with
-#	each worker server
-#------------------------------------------------------------
 def main():
 	if (len(sys.argv) > 1):
 		queue_name = sys.argv[1]

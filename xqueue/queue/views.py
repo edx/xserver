@@ -10,6 +10,16 @@ import pika
 import queue_common
 import queue_send
 
+# Xqueue reply format:
+#	JSON-serialized dict:
+#	{ 'return_code': 0(success)/1(error),
+#	  'content'    : 'my content', }
+#--------------------------------------------------
+def _compose_reply(success, content):
+	return_code = 0 if success else 1
+	return json.dumps({ 'return_code': return_code,
+						'content': content })
+
 # Xqueue submission from LMS
 #--------------------------------------------------
 @csrf_exempt
@@ -23,12 +33,17 @@ def submit(request):
 			queue_name = queue_send.get_queue_name(p)
 			if queue_name in queue_common.QUEUES:
 				queue_send.push_to_queue(queue_name, p)
-				return HttpResponse(queue_send.compose_reply('SUBMITTED'))
+				return HttpResponse(_compose_reply(success=True,
+												   content="Job submitted to queue '%s'" % queue_name))
+			else:
+				return HttpResponse(_compose_reply(success=False,
+												   content="Queue '%s' not found" % queue_name))
 		
-		# Defaults to BADREQUEST
-		return HttpResponse(queue_send.compose_reply('BADREQUEST'))
+		return HttpResponse(_compose_reply(success=False,
+										   content='Queue request has invalid format'))
 	else:
-		return HttpResponseServerError('NOGET')
+		return HttpResponse(_compose_reply(success=False,
+										   content='Queue requests should use HTTP POST'))
 
 # External polling interface
 #	1) get_queuelen
@@ -45,10 +60,13 @@ def get_queuelen(request):
 		queue_name = str(g['queue_name'])
 		if queue_name in queue_common.QUEUES:
 			job_count = queue_send.push_to_queue(queue_name)
-			return HttpResponse(queue_send.compose_reply('%d' % job_count))
-		
-	# Default behavior: return names of all queues
-	return HttpResponse(queue_send.compose_reply('%s' % ' '.join(queue_common.QUEUES)))
+			return HttpResponse(_compose_reply(success=True, content=job_count))
+		else:	
+			# Queue name incorrect: List all queues
+			return HttpResponse(_compose_reply(success=False, content=' '.join(queue_common.QUEUES)))
+	
+	return HttpResponse(_compose_reply(success=False,
+									   content="Must provide parameter 'queue_name'"))
 
 def get_submission(request):
 	'''
@@ -59,7 +77,10 @@ def get_submission(request):
 	g = request.GET.copy()
 	if 'queue_name' in g:
 		queue_name = str(g['queue_name'])
-		if queue_name in queue_common.QUEUES:
+		if queue_name not in queue_common.QUEUES:
+			return HttpResponse(_compose_reply(success=False,
+											   content="Queue '%s' not found" % queue_name))
+		else:
 			# Pull a single submission (if one exists) from the named queue
 			connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
 			channel = connection.channel()
@@ -67,7 +88,8 @@ def get_submission(request):
 			method, header, submission = channel.basic_get(queue=queue_name)
 
 			if method.NAME == 'Basic.GetEmpty': # Got nothing
-				print "Got nothing"
+				return HttpResponse(_compose_reply(success=False,
+												   content="Queue '%s' is empty" % queue_name))
 			else:
 				# Pull request info
 				worker = request.META['REMOTE_ADDR']
@@ -94,13 +116,13 @@ def get_submission(request):
 						   'pjob_key': pjob_key, } 
 				submission.update({queue_common.HEADER_TAG: header})
 				channel.basic_ack(method.delivery_tag)
-				#pjob.delete()
-				return HttpResponse(json.dumps(submission))
+				return HttpResponse(_compose_reply(success=True,
+												   content=json.dumps(submission)))
 
 			connection.close()
 
-	# Default return
-	return HttpResponse(queue_send.compose_reply('get_submission: I got nothing for you'))
+	return HttpResponse(_compose_reply(success=False,
+									   content="Must provide parameter 'queue_name'"))
 
 @csrf_exempt
 def put_result(request):
@@ -116,10 +138,11 @@ def put_result(request):
 			pjob_id = header['pjob_id']
 			pjob = PulledJob.objects.get(id=pjob_id)
 		except PulledJob.DoesNotExist:
-			return HttpResponse(queue_send.compose_reply('Job does not exist'))
+			return HttpResponse(_compose_reply(success=False,
+											   content='Pulled job does not exist in Xqueue records'))
 
 		print pjob
-		return HttpResponse(queue_send.compose_reply('Okay'))
+		return HttpResponse(_compose_reply(success=True, content=''))
 	else:
-		return HttpResponse(queue_send.compose_reply('Wrong method'))
-
+		return HttpResponse(_compose_reply(success=False,
+										   content='Queue requests should use HTTP POST'))
