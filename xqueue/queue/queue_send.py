@@ -12,6 +12,10 @@ def get_queue_name(get):
 	return str(header['queue_name'])
 
 def push_to_queue(queue_name, get=None):
+	'''
+		Publishes the message to a specified queue.
+		Returns the number of outstanding messages in specified queue
+	'''
 	connection = pika.BlockingConnection(pika.ConnectionParameters(
 		host=queue_common.RABBIT_HOST))
 	channel = connection.channel()
