@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseServerError
+from django.http import HttpResponse 
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from queue.models import PulledJob
@@ -8,7 +8,8 @@ import json
 import pika
 
 import queue_common
-import queue_send
+import queue_producer 
+import queue_consumer
 
 # Xqueue reply format:
 #	JSON-serialized dict:
@@ -25,14 +26,13 @@ def _compose_reply(success, content):
 @csrf_exempt
 def submit(request):
 	if request.method == 'POST':
-		p = request.POST.copy()
-
-		if queue_send.is_valid_request(p):
+		p = request.POST.dict()
+		if queue_producer.is_valid_request(p):
 			# Which queue do we send to? 
 			# Does this xserver instance manage this queue?
-			queue_name = queue_send.get_queue_name(p)
+			queue_name = queue_producer.get_queue_name(p)
 			if queue_name in queue_common.QUEUES:
-				queue_send.push_to_queue(queue_name, p)
+				queue_producer.push_to_queue(queue_name, p)
 				return HttpResponse(_compose_reply(success=True,
 												   content="Job submitted to queue '%s'" % queue_name))
 			else:
@@ -59,7 +59,7 @@ def get_queuelen(request):
 	if 'queue_name' in g:
 		queue_name = str(g['queue_name'])
 		if queue_name in queue_common.QUEUES:
-			job_count = queue_send.push_to_queue(queue_name)
+			job_count = queue_producer.push_to_queue(queue_name)
 			return HttpResponse(_compose_reply(success=True, content=job_count))
 		else:	
 			# Queue name incorrect: List all queues
