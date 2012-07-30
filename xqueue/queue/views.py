@@ -119,7 +119,7 @@ def get_submission(request):
                 qitem.pop(queue_common.HEADER_TAG)
                 header = { 'pjob_id' : pjob.id,
                            'pjob_key': pjob_key, } 
-                qitem.update({queue_common.HEADER_TAG: header})
+                qitem.update({queue_common.HEADER_TAG: json.dumps(header)})
                 channel.basic_ack(method.delivery_tag)
                 return HttpResponse(_compose_reply(success=True,
                                                    content=json.dumps(qitem)))
