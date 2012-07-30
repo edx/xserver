@@ -108,8 +108,8 @@ def get_submission(request):
                 pjob_key = h.hexdigest()
                 pjob = PulledJob(pjob_key=pjob_key,
                                  pulltime=pulltime,
-                                 worker=requester,
-                                 submission=qitem) # qitem is serialized
+                                 requester=requester,
+                                 qitem=qitem) # qitem is serialized
                 pjob.save()
 
                 # Deliver sanitized qitem to the requester.
@@ -150,7 +150,7 @@ def put_result(request):
             return HttpResponse(_compose_reply(success=False,
                                                content='Pulled job key does not match database'))
 
-        qitem = pjob.submission # Original queued item
+        qitem = pjob.qitem # Original queued item
         qitem = json.loads(qitem)
         lms_header = json.loads(qitem[queue_common.HEADER_TAG])
         queue_consumer.post_to_lms(lms_header, p[queue_common.BODY_TAG])
