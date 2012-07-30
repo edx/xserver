@@ -32,7 +32,7 @@ def submit(request):
             # Does this xserver instance manage this queue?
             queue_name = queue_producer.get_queue_name(p)
             if queue_name in queue_common.QUEUES:
-                queue_producer.push_to_queue(queue_name, p)
+                queue_producer.push_to_queue(queue_name, json.dumps(p))
                 return HttpResponse(_compose_reply(success=True,
                                                    content="Job submitted to queue '%s'" % queue_name))
             else:
@@ -66,7 +66,7 @@ def get_queuelen(request):
             return HttpResponse(_compose_reply(success=False, content=' '.join(queue_common.QUEUES)))
     
     return HttpResponse(_compose_reply(success=False,
-                                       content="Must provide parameter 'queue_name'"))
+                                       content="'get_queuelen' must provide parameter 'queue_name'"))
 
 def get_submission(request):
     '''
@@ -109,13 +109,13 @@ def get_submission(request):
                 pjob = PulledJob(pjob_key=pjob_key,
                                  pulltime=pulltime,
                                  worker=requester,
-                                 submission=qitem)
+                                 submission=qitem) # qitem is serialized
                 pjob.save()
 
                 # Deliver sanitized qitem to the requester.
                 #    Remove header originating from the LMS
                 #    Replace with header relevant for xqueue callback
-                qitem = json.loads(qitem)
+                qitem = json.loads(qitem) # De-serialize qitem
                 qitem.pop(queue_common.HEADER_TAG)
                 header = { 'pjob_id' : pjob.id,
                            'pjob_key': pjob_key, } 
@@ -127,7 +127,7 @@ def get_submission(request):
             connection.close()
 
     return HttpResponse(_compose_reply(success=False,
-                                       content="Must provide parameter 'queue_name'"))
+                                       content="'get_submission' must provide parameter 'queue_name'"))
 
 @csrf_exempt
 def put_result(request):
@@ -136,18 +136,26 @@ def put_result(request):
     '''
     if request.method == 'POST':
         p = request.POST.dict()
-        header = json.loads(p.pop(queue_common.HEADER_TAG))
+        ext_header = json.loads(p[queue_common.HEADER_TAG])
 
         # Extract from the record of pulled jobs
         try:
-            pjob_id = header['pjob_id']
+            pjob_id = ext_header['pjob_id']
             pjob = PulledJob.objects.get(id=pjob_id)
         except PulledJob.DoesNotExist:
             return HttpResponse(_compose_reply(success=False,
                                                content='Pulled job does not exist in Xqueue records'))
+        
+        if pjob.pjob_key != ext_header['pjob_key']:
+            return HttpResponse(_compose_reply(success=False,
+                                               content='Pulled job key does not match database'))
 
-        print pjob
+        qitem = pjob.submission # Original queued item
+        qitem = json.loads(qitem)
+        lms_header = json.loads(qitem[queue_common.HEADER_TAG])
+        queue_consumer.post_to_lms(lms_header, p[queue_common.BODY_TAG])
+
         return HttpResponse(_compose_reply(success=True, content=''))
     else:
         return HttpResponse(_compose_reply(success=False,
-                                           content='Queue requests should use HTTP POST'))
+                                           content="'put_result' must use HTTP POST"))
