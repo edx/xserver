@@ -18,8 +18,8 @@ def main():
     #------------------------------------------------------------
     s = requests.session()
     r = s.post(xqueue_url+'xqueue/login/',
-		       data={'username':'kimth',
-					 'password':'password'})
+               data={'username':'kimth',
+                     'password':'password'})
     xreply = json.loads(r.text)
     if xreply['return_code']: # Non-zero return code indicates error 
         print xreply['content']
