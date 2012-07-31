@@ -10,9 +10,7 @@ import queue_common
 WORKER_URLS = ['http://ec2-50-16-103-147.compute-1.amazonaws.com']*2
 
 def post_to_lms(header, body):
-    # NOTE: hard-coded to my LMS sandbox
-    dispatch = 'score_update'
-    return_url = 'http://18.189.69.130:8000' + header['return_url'] + dispatch
+    return_url = header['lms_callback_url']
     payload = { queue_common.HEADER_TAG: json.dumps(header),
                 queue_common.BODY_TAG  : body,
               }

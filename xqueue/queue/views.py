@@ -1,3 +1,6 @@
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import HttpResponse 
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
@@ -46,10 +49,32 @@ def submit(request):
                                            content='Queue requests should use HTTP POST'))
 
 # External polling interface
+#    0) login
 #    1) get_queuelen
 #    2) get_submission
 #    3) put_result
 #--------------------------------------------------
+@csrf_exempt
+def log_in(request):
+    if request.method == 'POST':
+        p = request.POST.dict()
+        if p.has_key('username') and p.has_key('password'):
+            user = authenticate(username=p['username'], password=p['password'])
+            if user is not None:
+                login(request, user)
+                return HttpResponse(_compose_reply(success=True,
+                                               content='Logged in'))
+            else:
+                return HttpResponse(_compose_reply(success=False,
+                                               content='Incorrect login credentials'))
+        else:
+            return HttpResponse(_compose_reply(success=False,
+                                               content='Insufficient login info'))
+    else:
+        return HttpResponse(_compose_reply(success=False,
+                                           content='Log in with HTTP POST'))
+
+@login_required
 def get_queuelen(request):
     '''
         Retrieves the length of queue named by GET['queue_name'].
@@ -63,11 +88,13 @@ def get_queuelen(request):
             return HttpResponse(_compose_reply(success=True, content=job_count))
         else:    
             # Queue name incorrect: List all queues
-            return HttpResponse(_compose_reply(success=False, content=' '.join(queue_common.QUEUES)))
+            return HttpResponse(_compose_reply(success=False, 
+                                               content='Valid queue names are: '+' '.join(queue_common.QUEUES)))
     
     return HttpResponse(_compose_reply(success=False,
                                        content="'get_queuelen' must provide parameter 'queue_name'"))
 
+@login_required
 def get_submission(request):
     '''
         Retrieves a student submission from queue named by GET['queue_name'].
@@ -130,6 +157,7 @@ def get_submission(request):
                                        content="'get_submission' must provide parameter 'queue_name'"))
 
 @csrf_exempt
+@login_required
 def put_result(request):
     '''
         Graders post their results here.
