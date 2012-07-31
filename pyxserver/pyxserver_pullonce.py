@@ -11,14 +11,26 @@ import requests
 #------------------------------------------------------------
 def main():
     xqueue_url = 'http://107.20.215.194/'
-    queue_name = 'mitx-600x'
+    queue_name = 'MITx-6.00x'
+    #queue_name = 'python'
+
+    # 0. Log in
+    #------------------------------------------------------------
+    s = requests.session()
+    r = s.post(xqueue_url+'xqueue/login/',
+               data={'username':'kimth',
+                     'password':'password'})
+    xreply = json.loads(r.text)
+    if xreply['return_code']: # Non-zero return code indicates error 
+        print xreply['content']
+        return
 
     # 1. Get length of queue
     #------------------------------------------------------------
-    r = requests.get(xqueue_url+'xqueue/get_queuelen/',
+    r = s.get(xqueue_url+'xqueue/get_queuelen/',
                      params={'queue_name':queue_name})
     xreply = json.loads(r.text)
-    if xreply['return_code']: # Non-zero return code indicates error 
+    if xreply['return_code']:
         print xreply['content']
         return
     queuelen = xreply['content']
@@ -28,7 +40,7 @@ def main():
 
     # 2. Contact xqueue and get a student submission
     #------------------------------------------------------------
-    r = requests.get(xqueue_url+'xqueue/get_submission/',
+    r = s.get(xqueue_url+'xqueue/get_submission/',
                      params={'queue_name':queue_name})
     xreply = json.loads(r.text)
     if xreply['return_code']:
@@ -54,7 +66,7 @@ def main():
     #------------------------------------------------------------
     xpackage = {'xqueue_header': xheader,
                 'xqueue_body'  : grader_reply,}
-    r = requests.post(xqueue_url+'xqueue/put_result/',
+    r = s.post(xqueue_url+'xqueue/put_result/',
                      data=xpackage)
     xreply = json.loads(r.text)
     if xreply['return_code']:
