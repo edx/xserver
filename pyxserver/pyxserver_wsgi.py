@@ -1,15 +1,11 @@
 #!/usr/bin/python
 #------------------------------------------------------------
 # File: pyxserver_wsgi.py
-# Date: 2012 July 24
 # Author: T. H. Kim <kimth@stanford.edu>
 #
 # Re-wrapped pyxserver to be compatible with nginx + (uWSGI or gunicorn)
 #
 # Run me with (may need sudo privilege for logging):
-#    uWSGI: 
-#        uwsgi --socket 127.0.0.1:3031 --wsgi-file /path/to/pyxserver_wsgi.py --processes 4
-#    gunicorn:
 #        gunicorn -w 4 -b 127.0.0.1:3031 pyxserver_wsgi:application
 #------------------------------------------------------------
 
