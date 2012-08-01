@@ -11,7 +11,7 @@ import requests
 #------------------------------------------------------------
 def main():
     xqueue_url = 'http://107.20.215.194/'
-    queue_name = 'mitx-600x'
+    queue_name = 'MITx-6.00x'
     #queue_name = 'python'
 
     # 0. Log in
