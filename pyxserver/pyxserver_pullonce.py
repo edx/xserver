@@ -10,9 +10,9 @@ import requests
 #    3) put_result:       Return the results of a submission
 #------------------------------------------------------------
 def main():
-    xqueue_url = 'http://107.20.215.194/'
-    queue_name = 'MITx-6.00x'
-    #queue_name = 'python'
+    xqueue_url = 'http://xqueue.edx.org/'
+    #queue_name = 'MITx-6.00x'
+    queue_name = 'python'
 
     # 0. Log in
     #------------------------------------------------------------
@@ -28,7 +28,7 @@ def main():
     # 1. Get length of queue
     #------------------------------------------------------------
     r = s.get(xqueue_url+'xqueue/get_queuelen/',
-                     params={'queue_name':queue_name})
+              params={'queue_name':queue_name})
     xreply = json.loads(r.text)
     if xreply['return_code']:
         print xreply['content']
@@ -41,7 +41,7 @@ def main():
     # 2. Contact xqueue and get a student submission
     #------------------------------------------------------------
     r = s.get(xqueue_url+'xqueue/get_submission/',
-                     params={'queue_name':queue_name})
+              params={'queue_name':queue_name})
     xreply = json.loads(r.text)
     if xreply['return_code']:
         print xreply['content']    
@@ -49,7 +49,6 @@ def main():
 
     # Extract the package, which consists of header and body, 
     #    from the reply
-    #------------------------------------------------------------
     xpackage = json.loads(xreply['content'])
 
     xheader = xpackage['xqueue_header'] # Xqueue callback and secret key    
@@ -58,7 +57,6 @@ def main():
     # The current 'pull_once' routine is a wrapper for the
     #    synchronous 6.00x grader (pyxserver)
     # So, pyxserver should be running in the background
-    #------------------------------------------------------------
     r = requests.post('http://127.0.0.1:3031',data=xbody)
     grader_reply = r.text # Serialized text
 
@@ -66,8 +64,7 @@ def main():
     #------------------------------------------------------------
     xpackage = {'xqueue_header': xheader,
                 'xqueue_body'  : grader_reply,}
-    r = s.post(xqueue_url+'xqueue/put_result/',
-                     data=xpackage)
+    r = s.post(xqueue_url+'xqueue/put_result/', data=xpackage)
     xreply = json.loads(r.text)
     if xreply['return_code']:
         print xreply['content']
