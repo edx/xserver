@@ -24,6 +24,11 @@ def _compose_reply(success, content):
     return json.dumps({ 'return_code': return_code,
                         'content': content })
 
+# Status check
+#--------------------------------------------------
+def status(request):
+    return HttpResponse(_compose_reply(success=True, content='OK'))
+
 # Xqueue submission from LMS
 #--------------------------------------------------
 @csrf_exempt
