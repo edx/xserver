@@ -32,6 +32,7 @@ def status(request):
 # Xqueue submission from LMS
 #--------------------------------------------------
 @csrf_exempt
+@login_required
 def submit(request):
     if request.method == 'POST':
         p = request.POST.dict()
