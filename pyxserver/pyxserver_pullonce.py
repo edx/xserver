@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import json
+import sys
 import requests
 
 #------------------------------------------------------------
@@ -11,8 +12,11 @@ import requests
 #------------------------------------------------------------
 def main():
     xqueue_url = 'http://xqueue.edx.org/'
-    #queue_name = 'MITx-6.00x'
-    queue_name = 'python'
+    if len(sys.argv) > 1:
+        queue_name = sys.argv[1]
+    else:
+        #queue_name = 'MITx-6.00x'
+        queue_name = 'null'
 
     # 0. Log in
     #------------------------------------------------------------
