@@ -4,6 +4,7 @@ urlpatterns = patterns('queue.views',
     # General
     #------------------------------------------------------------
     url(r'^login/$', 'log_in'),
+    url(r'^logout/$', 'log_out'),
     url(r'^status/$', 'status'),
 
     # Push to queue from LMS

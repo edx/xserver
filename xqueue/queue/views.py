@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse 
@@ -45,6 +45,10 @@ def log_in(request):
     else:
         return HttpResponse(_compose_reply(success=False,
                                            content='Log in with HTTP POST'))
+
+def log_out(request):
+    logout(request)
+    return HttpResponse(_compose_reply(success=True,content='Goodbye'))
 
 # Status check
 #--------------------------------------------------
