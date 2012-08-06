@@ -28,8 +28,8 @@ DATABASES = {
     'default': {
 #        'ENGINE': 'django.db.backends.sqlite3',
 #        'NAME': 'xqueue.sqlite',
-		'ENGINE': 'django.db.backends.mysql',
-		'NAME': RDS_DBNAME,
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': RDS_DBNAME,
         'USER': RDS_USER,
         'PASSWORD': RDS_PASS,
         'HOST': RDS_URL,
@@ -140,7 +140,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-	'queue',
+    'queue',
 )
 
 LOGIN_URL = '/xqueue/login'

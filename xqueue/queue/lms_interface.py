@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse 
 from django.views.decorators.csrf import csrf_exempt
 
+import boto
 import json
 
 from queue.views import _compose_reply
@@ -38,4 +39,3 @@ def submit(request):
 
 def _upload_to_s3(file_to_upload):
     print file_to_upload.name
-
