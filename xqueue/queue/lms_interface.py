@@ -31,6 +31,8 @@ def submit(request):
                         _upload_to_s3(request.FILES[filename],s3_keyname)
 
                     qcount = queue_producer.push_to_queue(queue_name, qitem)
+                else:
+                    qcount = 0
 
                 return HttpResponse(compose_reply(success=True,
                                                    content="%d" % qcount))
