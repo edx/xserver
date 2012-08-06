@@ -7,6 +7,8 @@ ROOT_PATH = os.path.dirname(__file__)
 # TODO: Collection of parameters to be hooked into rest of edX system
 #------------------------------------------------------------
 # For S3
+AWS_ACCESS_KEY = 'AKIAIYY272VA3C5R4DSQ'
+AWS_SECRET_KEY = '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'
 
 # For RDS
 RDS_URL    = 'xqueue.cl0iwjvwuiai.us-east-1.rds.amazonaws.com'
