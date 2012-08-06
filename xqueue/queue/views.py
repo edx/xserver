@@ -42,7 +42,7 @@ def log_in(request):
                                                content='Insufficient login info'))
     else:
         return HttpResponse(compose_reply(success=False,
-                                           content='Log in with HTTP POST'))
+                                           content='login_required'))
 
 def log_out(request):
     logout(request)

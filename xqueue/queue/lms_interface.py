@@ -30,10 +30,10 @@ def submit(request):
                         s3_keyname = make_hashkey(qitem+filename)
                         _upload_to_s3(request.FILES[filename],s3_keyname)
 
-                    queue_producer.push_to_queue(queue_name, qitem)
+                    qcount = queue_producer.push_to_queue(queue_name, qitem)
 
                 return HttpResponse(compose_reply(success=True,
-                                                   content="Job submitted to queue '%s'" % queue_name))
+                                                   content="%d" % qcount))
             else:
                 return HttpResponse(compose_reply(success=False,
                                                    content="Queue '%s' not found" % queue_name))
