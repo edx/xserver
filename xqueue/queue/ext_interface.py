@@ -21,8 +21,8 @@ import queue_consumer
 @login_required
 def get_queuelen(request):
     '''
-        Retrieves the length of queue named by GET['queue_name'].
-        If queue_name is invalid or null, returns list of all queue names
+    Retrieves the length of queue named by GET['queue_name'].
+    If queue_name is invalid or null, returns list of all queue names
     '''
     g = request.GET.copy()
     if 'queue_name' in g:
@@ -33,24 +33,24 @@ def get_queuelen(request):
         else:    
             # Queue name incorrect: List all queues
             return HttpResponse(compose_reply(success=False, 
-                                               content='Valid queue names are: '+' '.join(queue_common.QUEUES)))
+                                              content='Valid queue names are: '+' '.join(queue_common.QUEUES)))
     
     return HttpResponse(compose_reply(success=False,
-                                       content="'get_queuelen' must provide parameter 'queue_name'"))
+                                      content="'get_queuelen' must provide parameter 'queue_name'"))
 
 @login_required
 def get_submission(request):
     '''
-        Retrieves a student submission from queue named by GET['queue_name'].
-        The submission is pulled out from the queue, but is tracked in a separate 
-            database in xqueue
+    Retrieves a student submission from queue named by GET['queue_name'].
+    The submission is pulled out from the queue, but is tracked in a separate 
+        database in xqueue
     '''
     g = request.GET.copy()
     if 'queue_name' in g:
         queue_name = str(g['queue_name'])
         if queue_name not in queue_common.QUEUES:
             return HttpResponse(compose_reply(success=False,
-                                               content="Queue '%s' not found" % queue_name))
+                                              content="Queue '%s' not found" % queue_name))
         else:
             # Pull a single submission (if one exists) from the named queue
             connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
@@ -65,7 +65,7 @@ def get_submission(request):
 
             if method.NAME == 'Basic.GetEmpty': # Got nothing
                 return HttpResponse(compose_reply(success=False,
-                                                   content="Queue '%s' is empty" % queue_name))
+                                                  content="Queue '%s' is empty" % queue_name))
             else:
                 # Info on pull requester
                 requester = request.META['REMOTE_ADDR']
@@ -85,23 +85,23 @@ def get_submission(request):
                 #    Replace with header relevant for xqueue callback
                 qitem = json.loads(qitem) # De-serialize qitem
                 qitem.pop(queue_common.HEADER_TAG)
-                header = { 'pjob_id' : pjob.id,
-                           'pjob_key': pjob_key, } 
+                header = { 'submission_id' : pjob.id,
+                           'submission_key': pjob_key, } 
                 qitem.update({queue_common.HEADER_TAG: json.dumps(header)})
                 channel.basic_ack(method.delivery_tag)
                 return HttpResponse(compose_reply(success=True,
-                                                   content=json.dumps(qitem)))
+                                                  content=json.dumps(qitem)))
 
             connection.close()
 
     return HttpResponse(compose_reply(success=False,
-                                       content="'get_submission' must provide parameter 'queue_name'"))
+                                      content="'get_submission' must provide parameter 'queue_name'"))
 
 @csrf_exempt
 @login_required
 def put_result(request):
     '''
-        Graders post their results here.
+    Graders post their results here.
     '''
     if request.method == 'POST':
         p = request.POST.dict()
@@ -109,15 +109,15 @@ def put_result(request):
 
         # Extract from the record of pulled jobs
         try:
-            pjob_id = ext_header['pjob_id']
+            pjob_id = ext_header['submission_id']
             pjob = PulledJob.objects.get(id=pjob_id)
         except PulledJob.DoesNotExist:
             return HttpResponse(compose_reply(success=False,
-                                               content='Pulled job does not exist in Xqueue records'))
+                                              content='Pulled job does not exist in Xqueue records'))
         
-        if pjob.pjob_key != ext_header['pjob_key']:
+        if pjob.pjob_key != ext_header['submission_key']:
             return HttpResponse(compose_reply(success=False,
-                                               content='Pulled job key does not match database'))
+                                              content='Pulled job key does not match database'))
 
         qitem = pjob.qitem # Original queued item
         qitem = json.loads(qitem)
@@ -127,4 +127,4 @@ def put_result(request):
         return HttpResponse(compose_reply(success=True, content=''))
     else:
         return HttpResponse(compose_reply(success=False,
-                                           content="'put_result' must use HTTP POST"))
+                                          content="'put_result' must use HTTP POST"))

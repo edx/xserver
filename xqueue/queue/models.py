@@ -13,7 +13,7 @@ class Submission(models.Model):
     qitem = models.TextField()                       # Serialized record of the queued item
     external_url = models.CharField(max_length=1024) # URL to externally-hosted (e.g. S3) file, if any 
 
-    arrival_time = models.DateTimeField() # Time of arrival from LMS
+    arrival_time = models.DateTimeField(auto_now=True) # Time of arrival from LMS
     pull_time = models.DateTimeField()    # Time of pull request, if pulled from external grader
     push_time = models.DateTimeField()    # Time of push, if xqueue pushed to external grader
     return_time = models.DateTimeField()  # Time of return from external grader

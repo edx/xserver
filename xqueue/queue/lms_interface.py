@@ -26,14 +26,21 @@ def submit(request):
                     qitem = json.dumps(p)
 
                     # Check for file uploads
+                    files = request.FILES.values()
+                    print type(request.FILES.values())
+                    print request.FILES.values()
+
                     for filename in request.FILES.keys():
                         s3_keyname = make_hashkey(qitem+filename)
                         _upload_to_s3(request.FILES[filename],s3_keyname)
+                    
+                    # Track the request in the Submission database
 
                     qcount = queue_producer.push_to_queue(queue_name, qitem)
                 else:
                     qcount = 0
-
+                
+                # For a successful submission, return the count of prior items
                 return HttpResponse(compose_reply(success=True,
                                                    content="%d" % qcount))
             else:
