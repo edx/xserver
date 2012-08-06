@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse 
 from django.views.decorators.csrf import csrf_exempt
 
+import hashlib
 import json
 
 # Xqueue reply format:
@@ -11,10 +12,15 @@ import json
 #    { 'return_code': 0(success)/1(error),
 #      'content'    : 'my content', }
 #--------------------------------------------------
-def _compose_reply(success, content):
+def compose_reply(success, content):
     return_code = 0 if success else 1
     return json.dumps({ 'return_code': return_code,
                         'content': content })
+
+def make_hashkey(seed):
+    h = hashlib.md5()
+    h.update(str(seed))
+    return h.hexdigest()
 
 # Log in
 #--------------------------------------------------
@@ -26,23 +32,23 @@ def log_in(request):
             user = authenticate(username=p['username'], password=p['password'])
             if user is not None:
                 login(request, user)
-                return HttpResponse(_compose_reply(success=True,
+                return HttpResponse(compose_reply(success=True,
                                                content='Logged in'))
             else:
-                return HttpResponse(_compose_reply(success=False,
+                return HttpResponse(compose_reply(success=False,
                                                content='Incorrect login credentials'))
         else:
-            return HttpResponse(_compose_reply(success=False,
+            return HttpResponse(compose_reply(success=False,
                                                content='Insufficient login info'))
     else:
-        return HttpResponse(_compose_reply(success=False,
+        return HttpResponse(compose_reply(success=False,
                                            content='Log in with HTTP POST'))
 
 def log_out(request):
     logout(request)
-    return HttpResponse(_compose_reply(success=True,content='Goodbye'))
+    return HttpResponse(compose_reply(success=True,content='Goodbye'))
 
 # Status check
 #--------------------------------------------------
 def status(request):
-    return HttpResponse(_compose_reply(success=True, content='OK'))
+    return HttpResponse(compose_reply(success=True, content='OK'))

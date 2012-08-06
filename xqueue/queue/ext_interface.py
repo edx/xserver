@@ -8,7 +8,7 @@ import json
 import pika
 
 from queue.models import PulledJob
-from queue.views import _compose_reply
+from queue.views import compose_reply, make_hashkey
 import queue_common
 import queue_producer 
 import queue_consumer
@@ -29,13 +29,13 @@ def get_queuelen(request):
         queue_name = str(g['queue_name'])
         if queue_name in queue_common.QUEUES:
             job_count = queue_producer.push_to_queue(queue_name)
-            return HttpResponse(_compose_reply(success=True, content=job_count))
+            return HttpResponse(compose_reply(success=True, content=job_count))
         else:    
             # Queue name incorrect: List all queues
-            return HttpResponse(_compose_reply(success=False, 
+            return HttpResponse(compose_reply(success=False, 
                                                content='Valid queue names are: '+' '.join(queue_common.QUEUES)))
     
-    return HttpResponse(_compose_reply(success=False,
+    return HttpResponse(compose_reply(success=False,
                                        content="'get_queuelen' must provide parameter 'queue_name'"))
 
 @login_required
@@ -49,7 +49,7 @@ def get_submission(request):
     if 'queue_name' in g:
         queue_name = str(g['queue_name'])
         if queue_name not in queue_common.QUEUES:
-            return HttpResponse(_compose_reply(success=False,
+            return HttpResponse(compose_reply(success=False,
                                                content="Queue '%s' not found" % queue_name))
         else:
             # Pull a single submission (if one exists) from the named queue
@@ -64,7 +64,7 @@ def get_submission(request):
             method, header, qitem = channel.basic_get(queue=queue_name)
 
             if method.NAME == 'Basic.GetEmpty': # Got nothing
-                return HttpResponse(_compose_reply(success=False,
+                return HttpResponse(compose_reply(success=False,
                                                    content="Queue '%s' is empty" % queue_name))
             else:
                 # Info on pull requester
@@ -73,10 +73,7 @@ def get_submission(request):
                 print 'Pull request from %s at %s' % (requester, str(pulltime))
 
                 # Track the pull request in our database
-                h = hashlib.md5()
-                h.update(str(pulltime))
-                h.update(qitem)
-                pjob_key = h.hexdigest()
+                pjob_key = make_hashkey(str(pulltime)+qitem)
                 pjob = PulledJob(pjob_key=pjob_key,
                                  pulltime=pulltime,
                                  requester=requester,
@@ -92,12 +89,12 @@ def get_submission(request):
                            'pjob_key': pjob_key, } 
                 qitem.update({queue_common.HEADER_TAG: json.dumps(header)})
                 channel.basic_ack(method.delivery_tag)
-                return HttpResponse(_compose_reply(success=True,
+                return HttpResponse(compose_reply(success=True,
                                                    content=json.dumps(qitem)))
 
             connection.close()
 
-    return HttpResponse(_compose_reply(success=False,
+    return HttpResponse(compose_reply(success=False,
                                        content="'get_submission' must provide parameter 'queue_name'"))
 
 @csrf_exempt
@@ -115,11 +112,11 @@ def put_result(request):
             pjob_id = ext_header['pjob_id']
             pjob = PulledJob.objects.get(id=pjob_id)
         except PulledJob.DoesNotExist:
-            return HttpResponse(_compose_reply(success=False,
+            return HttpResponse(compose_reply(success=False,
                                                content='Pulled job does not exist in Xqueue records'))
         
         if pjob.pjob_key != ext_header['pjob_key']:
-            return HttpResponse(_compose_reply(success=False,
+            return HttpResponse(compose_reply(success=False,
                                                content='Pulled job key does not match database'))
 
         qitem = pjob.qitem # Original queued item
@@ -127,7 +124,7 @@ def put_result(request):
         lms_header = json.loads(qitem[queue_common.HEADER_TAG])
         queue_consumer.post_to_lms(lms_header, p[queue_common.BODY_TAG])
 
-        return HttpResponse(_compose_reply(success=True, content=''))
+        return HttpResponse(compose_reply(success=True, content=''))
     else:
-        return HttpResponse(_compose_reply(success=False,
+        return HttpResponse(compose_reply(success=False,
                                            content="'put_result' must use HTTP POST"))
