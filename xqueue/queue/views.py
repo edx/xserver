@@ -24,41 +24,7 @@ def _compose_reply(success, content):
     return json.dumps({ 'return_code': return_code,
                         'content': content })
 
-# Status check
-#--------------------------------------------------
-def status(request):
-    return HttpResponse(_compose_reply(success=True, content='OK'))
-
-# Xqueue submission from LMS
-#--------------------------------------------------
-@csrf_exempt
-@login_required
-def submit(request):
-    if request.method == 'POST':
-        p = request.POST.dict()
-        if queue_producer.is_valid_request(p):
-            # Which queue do we send to? 
-            # Does this xserver instance manage this queue?
-            queue_name = queue_producer.get_queue_name(p)
-            if queue_name in queue_common.QUEUES:
-                queue_producer.push_to_queue(queue_name, json.dumps(p))
-                return HttpResponse(_compose_reply(success=True,
-                                                   content="Job submitted to queue '%s'" % queue_name))
-            else:
-                return HttpResponse(_compose_reply(success=False,
-                                                   content="Queue '%s' not found" % queue_name))
-        
-        return HttpResponse(_compose_reply(success=False,
-                                           content='Queue request has invalid format'))
-    else:
-        return HttpResponse(_compose_reply(success=False,
-                                           content='Queue requests should use HTTP POST'))
-
-# External polling interface
-#    0) login
-#    1) get_queuelen
-#    2) get_submission
-#    3) put_result
+# Log in
 #--------------------------------------------------
 @csrf_exempt
 def log_in(request):
@@ -79,6 +45,48 @@ def log_in(request):
     else:
         return HttpResponse(_compose_reply(success=False,
                                            content='Log in with HTTP POST'))
+
+# Status check
+#--------------------------------------------------
+def status(request):
+    return HttpResponse(_compose_reply(success=True, content='OK'))
+
+# Xqueue submission from LMS
+#--------------------------------------------------
+@csrf_exempt
+@login_required
+def submit(request):
+    if request.method == 'POST':
+        print request.FILES.keys()
+        for filename in request.FILES.keys():
+            uploaded_file = request.FILES.get(filename)
+            print '-'*60
+            print uploaded_file.name
+            print uploaded_file.read()
+
+        p = request.POST.dict()
+        if queue_producer.is_valid_request(p):
+            queue_name = queue_producer.get_queue_name(p)
+            if queue_name in queue_common.QUEUES:
+                if queue_name != 'null':
+                    queue_producer.push_to_queue(queue_name, json.dumps(p))
+                return HttpResponse(_compose_reply(success=True,
+                                                   content="Job submitted to queue '%s'" % queue_name))
+            else:
+                return HttpResponse(_compose_reply(success=False,
+                                                   content="Queue '%s' not found" % queue_name))
+        
+        return HttpResponse(_compose_reply(success=False,
+                                           content='Queue request has invalid format'))
+    else:
+        return HttpResponse(_compose_reply(success=False,
+                                           content='Queue requests should use HTTP POST'))
+
+# External polling interface
+#    1) get_queuelen
+#    2) get_submission
+#    3) put_result
+#--------------------------------------------------
 
 @login_required
 def get_queuelen(request):
