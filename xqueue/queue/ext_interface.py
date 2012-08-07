@@ -80,14 +80,20 @@ def get_submission(request):
                                  qitem=qitem) # qitem is serialized
                 pjob.save()
 
-                # Deliver sanitized qitem to the requester.
-                #    Remove header originating from the LMS
-                #    Replace with header relevant for xqueue callback
+                # Deliver sanitized qitem to the requester:
+                #    1) Remove header originating from the LMS, and replace
+                #         with header relevant for Xqueue <--> External grader
+                #    2) Remove footer originating from inside Xqueue
                 qitem = json.loads(qitem) # De-serialize qitem
                 qitem.pop(queue_common.HEADER_TAG)
+                footer = qitem.pop(queue_common.FOOTER_TAG)
+
                 header = { 'submission_id' : pjob.id,
                            'submission_key': pjob_key, } 
+
                 qitem.update({queue_common.HEADER_TAG: json.dumps(header)})
+                qitem.update({'xqueue_files': footer['files']})
+
                 channel.basic_ack(method.delivery_tag)
                 return HttpResponse(compose_reply(success=True,
                                                   content=json.dumps(qitem)))

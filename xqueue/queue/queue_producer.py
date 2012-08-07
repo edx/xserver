@@ -2,22 +2,6 @@ import pika
 import json
 import queue_common
 
-def is_valid_request(get):
-    '''
-    A valid xqueue request must contain metadata 
-        associated with the key HEADER_TAG
-    '''
-    header = json.loads(get[queue_common.HEADER_TAG])
-    is_valid = True
-    for tag in ['lms_callback_url', 'lms_key', 'queue_name']:
-        if not header.has_key(tag):
-            is_valid = False
-    return is_valid
-
-def get_queue_name(get):
-    header = json.loads(get[queue_common.HEADER_TAG])
-    return str(header['queue_name'])
-
 def push_to_queue(queue_name, qitem=None):
     '''
     Publishes qitem (serialized data) to a specified queue.
