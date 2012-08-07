@@ -60,7 +60,9 @@ def get_submission(request):
             # 'qitem' is the queued item. We expect it to be the serialized
             #   form of the following dict:
             #   { 'xqueue_header': serialized_xqueue_header,
-            #     'xqueue_body'  : serialized_xqueue_body, }
+            #     'xqueue_body'  : serialized_xqueue_body,
+            #     'xqueue_footer': {'files': files, ...} (dict!)
+            #   }
             method, header, qitem = channel.basic_get(queue=queue_name)
 
             if method.NAME == 'Basic.GetEmpty': # Got nothing
@@ -73,6 +75,7 @@ def get_submission(request):
                 print 'Pull request from %s at %s' % (requester, str(pulltime))
 
                 # Track the pull request in our database
+                # TODO: Switch to Submission database
                 pjob_key = make_hashkey(str(pulltime)+qitem)
                 pjob = PulledJob(pjob_key=pjob_key,
                                  pulltime=pulltime,
