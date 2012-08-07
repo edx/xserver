@@ -76,7 +76,7 @@ def _is_valid_request(xrequest):
 
     try:
         header_dict = json.loads(header)
-    except ValueError, err:
+    except (TypeError, ValueError):
         return (False, '', '', '')
 
     for tag in ['lms_callback_url', 'lms_key', 'queue_name']:
