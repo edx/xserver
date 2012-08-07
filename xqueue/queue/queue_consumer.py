@@ -9,7 +9,7 @@ import threading
 from django.utils import timezone
 from os.path import abspath, dirname, join
 
-# DB-based consumer access to Django
+# DB-based consumer needs access to Django
 path = abspath(join(dirname(__file__),'../'))
 sys.path.append(path)
 os.environ['DJANGO_SETTINGS_MODULE'] = 'xqueue.settings'
