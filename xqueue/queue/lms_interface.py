@@ -12,11 +12,12 @@ from queue.views import compose_reply, make_hashkey
 import queue_common
 import queue_producer 
 
-# Xqueue submission from LMS
-#--------------------------------------------------
 @csrf_exempt
 @login_required
 def submit(request):
+    '''
+    Handle submissions to Xqueue from the LMS
+    '''
     if request.method != 'POST':
         return HttpResponse(compose_reply(False, 'Queue requests should use HTTP POST'))
     else:
@@ -47,7 +48,6 @@ def submit(request):
                                         s3_urls=json.dumps(s3_urls),
                                         s3_keys=json.dumps(s3_keys))
                 submission.save()
-                print submission
 
                 qitem  = str(submission.id) # Submit the Submission pointer to queue
                 qcount = queue_producer.push_to_queue(queue_name, qitem)
