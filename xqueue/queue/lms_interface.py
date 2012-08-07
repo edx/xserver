@@ -21,6 +21,8 @@ def submit(request):
         return HttpResponse(compose_reply(False, 'Queue requests should use HTTP POST'))
     else:
         xrequest = request.POST.copy()
+        
+        # queue_name, xqueue_header, xqueue_body are all serialized
         (request_is_valid, queue_name, xqueue_header, xqueue_body) = _is_valid_request(xrequest)
 
         if not request_is_valid: 
@@ -30,25 +32,28 @@ def submit(request):
                 return HttpResponse(compose_reply(False, "Queue '%s' not found" % queue_name))
             else:
                 # Check for file uploads
-                files = dict()
+                s3_keys = dict() # For internal Xqueue use
+                s3_urls = dict() # For external grader use
                 for filename in request.FILES.keys():
-                    s3_keyname = make_hashkey(filename) # TODO: Need salt
-                    s3_url = _upload_to_s3(request.FILES[filename],s3_keyname)
-                    files.update({filename: s3_url}) 
+                    s3_key = make_hashkey(xqueue_header+filename)
+                    s3_url = _upload_to_s3(request.FILES[filename],s3_key)
+                    s3_keys.update({filename: s3_key})
+                    s3_urls.update({filename: s3_url})
 
-                # Attach the uploaded file URLs to submission
-                footer = {'files': files}
-                submission.update({queue_common.FOOTER_TAG: footer})
+                # Track the submission in the Submission database
+                submission = Submission(queue_name=queue_name,
+                                        xqueue_header=xqueue_header,
+                                        xqueue_body=xqueue_body,
+                                        s3_urls=json.dumps(s3_urls),
+                                        s3_keys=json.dumps(s3_keys))
+                submission.save()
+                print submission
 
-                # TODO: Track the submission in the Submission database
-
-                # Serialize the queue request, and push to queue
-                qitem = json.dumps(submission)
+                qitem  = str(submission.id) # Submit the Submission pointer to queue
                 qcount = queue_producer.push_to_queue(queue_name, qitem)
                 
                 # For a successful submission, return the count of prior items
-                return HttpResponse(compose_reply(success=True,
-                                                  content="%d" % qcount))
+                return HttpResponse(compose_reply(success=True, content="%d" % qcount))
         
 
 def _is_valid_request(xrequest):
@@ -81,7 +86,14 @@ def _is_valid_request(xrequest):
     queue_name = str(header_dict['queue_name']) # Important: Queue name must be str!
     return (True, queue_name, header, body)
     
+
 def _upload_to_s3(file_to_upload, s3_keyname):
+    '''
+    Upload file to S3 using provided keyname.
+
+    Returns:
+        public_url: URL to access uploaded file 
+    '''
     conn = S3Connection(settings.AWS_ACCESS_KEY, settings.AWS_SECRET_KEY)
     bucketname = settings.AWS_ACCESS_KEY+'bucket' # TODO: Bucket name(s)
     bucket = conn.create_bucket(bucketname.lower())
