@@ -4,11 +4,14 @@ import sys
 import requests
 
 #------------------------------------------------------------
-# Simple demo of the (asynchronous) external grading interface.
+# Simple demo of the (asynchronous) external grading interface,
+#   and uploaded file access
+#
 # Xqueue API consists of:
+#    0) login:          Log in
 #    1) get_queuelen:   Get length of specific queue
 #    2) get_submission: Get single submission from a specific queue
-#    3) put_result:       Return the results of a submission
+#    3) put_result:     Return the results of a submission
 #------------------------------------------------------------
 def main():
     xqueue_url = 'http://xqueue.edx.org/'
@@ -20,57 +23,64 @@ def main():
     # 0. Log in
     #------------------------------------------------------------
     s = requests.session()
-    r = s.post(xqueue_url+'xqueue/login/',
-               data={'username':'kimth',
-                     'password':'password'})
-    xreply = json.loads(r.text)
-    if xreply['return_code']: # Non-zero return code indicates error 
-        print xreply['content']
+    r = s.post(xqueue_url+'xqueue/login/', data={'username':'kimth','password':'password'})
+    (error, msg) = parse_xreply(r.text)
+    if error: # We'll assume no error code for the remainder of the demo
+        print msg
         return
 
     # 1. Get length of queue
     #------------------------------------------------------------
-    r = s.get(xqueue_url+'xqueue/get_queuelen/',
-              params={'queue_name':queue_name})
-    xreply = json.loads(r.text)
-    if xreply['return_code']:
-        print xreply['content']
-        return
-    queuelen = xreply['content']
+    r = s.get(xqueue_url+'xqueue/get_queuelen/', params={'queue_name':queue_name})
+    (_, queuelen) = parse_xreply(r.text)
     print "Queue '%s' has %d awaiting jobs" % (queue_name, queuelen)
     if queuelen < 1:
         return
 
     # 2. Contact xqueue and get a student submission
     #------------------------------------------------------------
-    r = s.get(xqueue_url+'xqueue/get_submission/',
-              params={'queue_name':queue_name})
-    xreply = json.loads(r.text)
-    if xreply['return_code']:
-        print xreply['content']    
-        return
+    r = s.get(xqueue_url+'xqueue/get_submission/', params={'queue_name':queue_name})
+    (_, xpackage) = parse_xreply(r.text)
 
-    # Extract the package, which consists of header and body, 
-    #    from the reply
-    xpackage = json.loads(xreply['content'])
+    # Deserialize the package
+    xpackage = json.loads(xpackage)
 
-    xheader = xpackage['xqueue_header'] # Xqueue callback and secret key    
+    xheader = xpackage['xqueue_header'] # Xqueue callback, secret key
     xbody   = xpackage['xqueue_body']   # Grader-specific serial data
+    xfiles  = xpackage['xqueue_files']  # Dict {'filename': 'uploaded_file_url'} of student-uploaded files
 
-    # The current 'pull_once' routine is a wrapper for the
-    #    synchronous 6.00x grader (pyxserver)
-    # So, pyxserver should be running in the background
+    if xfiles: # Check for any uploaded files
+        uploaded_file_url = xfiles.values()[0] # Expecting just one file for 6.00x "pyxserver"
+        r = requests.get(uploaded_file_url)
+        uploaded_submission = r.text
+        
+        # Surgery of payload for pyxserver, which was not (originally) expecting a file
+        xbody = json.loads(xbody)
+        xbody.pop('edX_student_response')
+        xbody.update({'edX_student_response': uploaded_submission})
+        xbody = json.dumps(xbody)
+
+    # The current 'pull_once' routine is a wrapper for the synchronous 6.00x grader (pyxserver)
+    #   So, pyxserver should be running in the background...
     r = requests.post('http://127.0.0.1:3031',data=xbody)
     grader_reply = r.text # Serialized text
 
     # 3. Return graded result to xqueue
     #------------------------------------------------------------
-    xpackage = {'xqueue_header': xheader,
-                'xqueue_body'  : grader_reply,}
-    r = s.post(xqueue_url+'xqueue/put_result/', data=xpackage)
-    xreply = json.loads(r.text)
-    if xreply['return_code']:
-        print xreply['content']
+    returnpackage = {'xqueue_header': xheader,
+                     'xqueue_body'  : grader_reply,}
+    r = s.post(xqueue_url+'xqueue/put_result/', data=returnpackage)
+
+
+def parse_xreply(xreply_str):
+    try:
+        xreply = json.loads(xreply_str)
+        return_code = xreply['return_code'] # Nonzero return code indicates error
+        msg = xreply['content']
+    except Exception:
+        return (1, 'Unexpected reply from server.')
+    return (return_code, msg)
+
 
 if __name__ == "__main__":
     main()
