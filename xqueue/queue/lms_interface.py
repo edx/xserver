@@ -19,29 +19,26 @@ def submit(request):
     if request.method == 'POST':
         submission = request.POST.dict()
         (is_valid_request, lms_header) = _is_valid_request(submission)
-        if is_valid_request:                        # Check headers are correct
-            queue_name = str(lms_header['queue_name'])
-            if queue_name in queue_common.QUEUES:   # Check that requested queue exists
-                if queue_name != 'null':            # Check that non-'null' queue
-                    # Check for file uploads
-                    files = dict()
-                    for filename in request.FILES.keys():
-                        s3_keyname = make_hashkey(filename) # TODO: Need salt
-                        s3_url = _upload_to_s3(request.FILES[filename],s3_keyname)
-                        files.update({ filename: s3_url }) 
+        if is_valid_request:                           # Check headers are correct
+            queue_name = str(lms_header['queue_name']) # Important: queue_name must be str, not unicode!
+            if queue_name in queue_common.QUEUES:      # Check that requested queue exists
+                # Check for file uploads
+                files = dict()
+                for filename in request.FILES.keys():
+                    s3_keyname = make_hashkey(filename) # TODO: Need salt
+                    s3_url = _upload_to_s3(request.FILES[filename],s3_keyname)
+                    files.update({ filename: s3_url }) 
 
-                    # Attach the uploaded file URLs to submission
-                    footer = {'files': files}
-                    submission.update({queue_common.FOOTER_TAG: footer})
+                # Attach the uploaded file URLs to submission
+                footer = {'files': files}
+                submission.update({queue_common.FOOTER_TAG: footer})
 
-                    # Serialize the queue request
-                    qitem = json.dumps(submission)
+                # Serialize the queue request
+                qitem = json.dumps(submission)
 
-                    # TODO: Track the request in the Submission database
+                # TODO: Track the request in the Submission database
 
-                    qcount = queue_producer.push_to_queue(queue_name, qitem)
-                else:
-                    qcount = 0
+                qcount = queue_producer.push_to_queue(queue_name, qitem)
                 
                 # For a successful submission, return the count of prior items
                 return HttpResponse(compose_reply(success=True,

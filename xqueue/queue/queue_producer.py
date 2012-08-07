@@ -7,6 +7,9 @@ def push_to_queue(queue_name, qitem=None):
     Publishes qitem (serialized data) to a specified queue.
     Returns the number of outstanding messages in specified queue
     '''
+    if queue_name == 'null':
+        return 0
+
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         host=queue_common.RABBIT_HOST))
     channel = connection.channel()
