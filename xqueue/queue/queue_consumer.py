@@ -128,9 +128,9 @@ class SingleChannel(threading.Thread):
         submission.push_time = timezone.now()
         (grading_success, grader_reply) = _http_post(self.workerURL, json.dumps(payload))
         submission.return_time = timezone.now()
-        submission.grader_reply = grader_reply
 
         if grading_success:
+            submission.grader_reply = grader_reply
             submission.lms_ack = post_grade_to_lms(submission.xqueue_header, grader_reply) 
         else:
             submission.num_failures += 1
