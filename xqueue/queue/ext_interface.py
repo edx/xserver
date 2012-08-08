@@ -118,7 +118,6 @@ def put_result(request):
             # Deliver grading results to LMS
             submission.lms_ack = queue_consumer.post_grade_to_lms(submission.xqueue_header, grader_reply)
 
-            print submission
             submission.save()
 
             return HttpResponse(compose_reply(success=True, content=''))
