@@ -28,6 +28,32 @@ def clean_up_submission(submission):
     '''
     return
 
+def get_single_qitem(queue_name):
+    '''
+    Retrieve a single queued item, if one exists, from the named queue
+
+    Returns (success, qitem):
+        success: Flag whether retrieval is successful (Boolean)
+                 If no items in the queue, then return False
+        qitem:   Retrieved item
+    '''
+    queue_name = str(queue_name)
+    
+    # Pull a single submission (if one exists) from the named queue
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
+    channel = connection.channel()
+    channel.queue_declare(queue=queue_name, durable=True)
+
+    # qitem is the item from the queue
+    method, header, qitem = channel.basic_get(queue=queue_name)
+
+    if method.NAME == 'Basic.GetEmpty': # Got nothing
+        connection.close()
+        return (False, '')
+    else:
+        channel.basic_ack(method.delivery_tag)
+        connection.close()
+        return (True, qitem)
 
 def post_grade_to_lms(header, body):
     '''
@@ -73,19 +99,19 @@ class SingleChannel(threading.Thread):
         threading.Thread.__init__(self)
         self.workerID = workerID
         self.workerURL = workerURL
-        self.queue_name = queue_name
+        self.queue_name = str(queue_name) # Important, queue_name must be str, not unicode!
 
     def run(self):
-        print " [%d] Starting thread for queue '%s' using %s" % (self.workerID, self.queue_name, self.workerURL)
+        print " [%d] Starting consumer for queue '%s' using %s" % (self.workerID, self.queue_name, self.workerURL)
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
         channel = connection.channel()
         channel.queue_declare(queue=self.queue_name, durable=True)
         channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(self._callback,
+        channel.basic_consume(self.consumer_callback,
                               queue=self.queue_name)
         channel.start_consuming()
         
-    def _callback(self, ch, method, properties, qitem):
+    def consumer_callback(self, ch, method, properties, qitem):
 
         submission_id = int(qitem)
         try:
@@ -98,16 +124,17 @@ class SingleChannel(threading.Thread):
         payload = {'xqueue_body':  submission.xqueue_body,
                    'xqueue_files': submission.s3_urls}
 
-        submission.grader = self.workerURL
+        submission.grader_id = self.workerURL
         submission.push_time = timezone.now()
         (grading_success, grader_reply) = _http_post(self.workerURL, json.dumps(payload))
         submission.return_time = timezone.now()
+        submission.grader_reply = grader_reply
 
         if grading_success:
             submission.lms_ack = post_grade_to_lms(submission.xqueue_header, grader_reply) 
         else:
             submission.num_failures += 1
-
+        
         submission.save()
 
         # Take item off of queue. 

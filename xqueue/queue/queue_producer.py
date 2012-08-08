@@ -7,6 +7,8 @@ def push_to_queue(queue_name, qitem=None):
     Publishes qitem (serialized data) to a specified queue.
     Returns the number of outstanding messages in specified queue
     '''
+    queue_name = str(queue_name) # Important: queue_name cannot be unicode!
+
     if queue_name == 'null':
         return 0
 

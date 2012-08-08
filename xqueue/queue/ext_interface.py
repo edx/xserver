@@ -4,10 +4,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 
 import json
-import pika
 
 from queue.models import Submission 
-from queue.views import compose_reply, make_hashkey
+from queue.views import compose_reply
+from util import *
+
 import queue_common
 import queue_producer 
 import queue_consumer
@@ -23,70 +24,61 @@ def get_queuelen(request):
     Retrieves the length of queue named by GET['queue_name'].
     If queue_name is invalid or null, returns list of all queue names
     '''
-    g = request.GET.copy()
-    if 'queue_name' in g:
-        queue_name = str(g['queue_name'])
-        if queue_name in queue_common.QUEUES:
-            job_count = queue_producer.push_to_queue(queue_name)
-            return HttpResponse(compose_reply(True, job_count))
-        else: # Queue name incorrect: List all queues    
-            return HttpResponse(compose_reply(False, 'Valid queue names are: '+' '.join(queue_common.QUEUES)))
-    return HttpResponse(compose_reply(False, "'get_queuelen' must provide parameter 'queue_name'"))
+    try:
+        queue_name = request.GET['queue_name']
+    except KeyError:
+        return HttpResponse(compose_reply(False, "'get_queuelen' must provide parameter 'queue_name'"))
+
+    if queue_name in queue_common.QUEUES:
+        job_count = queue_producer.push_to_queue(queue_name)
+        return HttpResponse(compose_reply(True, job_count))
+    else:
+        return HttpResponse(compose_reply(False, 'Valid queue names are: '+' '.join(queue_common.QUEUES)))
 
 @login_required
 def get_submission(request):
     '''
     Retrieve a single submission from queue named by GET['queue_name'].
     '''
-    g = request.GET.copy()
-    if 'queue_name' not in g:
+    try:
+        queue_name = request.GET['queue_name']
+    except KeyError:
         return HttpResponse(compose_reply(False, "'get_submission' must provide parameter 'queue_name'"))
+
+    if queue_name not in queue_common.QUEUES:
+        return HttpResponse(compose_reply(False, "Queue '%s' not found" % queue_name))
     else:
-        queue_name = str(g['queue_name'])
-        if queue_name not in queue_common.QUEUES:
-            return HttpResponse(compose_reply(False, "Queue '%s' not found" % queue_name))
+        # Try to pull a single item from named queue
+        (got_qitem, qitem) = queue_consumer.get_single_qitem(queue_name)
+
+        if not got_qitem:
+            return HttpResponse(compose_reply(False, "Queue '%s' is empty" % queue_name))
         else:
-            # Pull a single submission (if one exists) from the named queue
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
-            channel = connection.channel()
-            channel.queue_declare(queue=queue_name, durable=True)
+            submission_id = int(qitem)
+            try:
+                submission = Submission.objects.get(id=submission_id)
+            except Submission.DoesNotExist:
+                return HttpResponse(compose_reply(False, "Error with queued submission. Please try again"))
 
-            # qitem is the item from the queue
-            method, header, qitem = channel.basic_get(queue=queue_name)
+            # Collect info on pull event
+            grader_id = get_request_ip(request)
+            pull_time = timezone.now()
+            pullkey   = make_hashkey(str(pull_time)+qitem)
+            
+            submission.grader_id = grader_id
+            submission.pull_time = pull_time
+            submission.pullkey   = pullkey 
+            
+            submission.save()
 
-            if method.NAME == 'Basic.GetEmpty': # Got nothing
-                return HttpResponse(compose_reply(False, "Queue '%s' is empty" % queue_name))
-            else:
-                submission_id = int(qitem)
-                try:
-                    submission = Submission.objects.get(id=submission_id)
-                except Submission.DoesNotExist:
-                    channel.basic_ack(method.delivery_tag)
-                    return HttpResponse(compose_reply(False, "Error with queued submission. Please try again"))
+            # Prepare payload to external grader
+            ext_header = {'submission_id':submission_id, 'submission_key':pullkey} 
+            
+            payload = {'xqueue_header': json.dumps(ext_header),
+                       'xqueue_body': submission.xqueue_body,
+                       'xqueue_files': submission.s3_urls} 
 
-                # Collect info on pull event
-                grader    = request.META['REMOTE_ADDR']
-                pull_time = timezone.now()
-                pullkey   = make_hashkey(str(pull_time)+qitem)
-                
-                submission.grader    = grader
-                submission.pull_time = pull_time
-                submission.pullkey   = pullkey 
-                
-                submission.save()
-
-                # Prepare payload to external grader
-                ext_header = {'submission_id':submission_id, 'submission_key':pullkey} 
-                
-                payload = {'xqueue_header': json.dumps(ext_header),
-                           'xqueue_body': submission.xqueue_body,
-                           'xqueue_files': submission.s3_urls} 
-
-                channel.basic_ack(method.delivery_tag)
-
-                return HttpResponse(compose_reply(True,content=json.dumps(payload)))
-
-            connection.close()
+            return HttpResponse(compose_reply(True,content=json.dumps(payload)))
 
 
 @csrf_exempt
@@ -98,8 +90,7 @@ def put_result(request):
     if request.method != 'POST':
         return HttpResponse(compose_reply(False, "'put_result' must use HTTP POST"))
     else:
-        post = request.POST.copy()
-        (reply_is_valid, submission_id, submission_key, grader_reply) = _is_valid_reply(post)
+        (reply_is_valid, submission_id, submission_key, grader_reply) = _is_valid_reply(request.POST)
 
         if not reply_is_valid:
             return HttpResponse(compose_reply(False, 'Incorrect reply format'))
@@ -114,6 +105,7 @@ def put_result(request):
             
             submission.return_time = timezone.now()
             submission.pullkey = '' 
+            submission.grader_reply = grader_reply
 
             # Deliver grading results to LMS
             submission.lms_ack = queue_consumer.post_grade_to_lms(submission.xqueue_header, grader_reply)
@@ -145,6 +137,9 @@ def _is_valid_reply(external_reply):
     try:
         header_dict = json.loads(header)
     except (TypeError, ValueError):
+        return fail
+
+    if not isinstance(header_dict,dict):
         return fail
 
     for tag in ['submission_id', 'submission_key']:
