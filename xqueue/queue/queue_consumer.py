@@ -1,26 +1,74 @@
 #!/usr/bin/env python
 import json
+import os
 import pika
 import requests
 import sys
 import threading 
 
+from django.utils import timezone
+from os.path import abspath, dirname, join
+
+# DB-based consumer needs access to Django
+path = abspath(join(dirname(__file__),'../'))
+sys.path.append(path)
+os.environ['DJANGO_SETTINGS_MODULE'] = 'xqueue.settings'
+
 import queue_common
+from queue.models import Submission
 
-WORKER_URLS = ['http://ec2-50-16-103-147.compute-1.amazonaws.com']*2
+# TODO: Convenient hook for setting WORKER_URLS
+NUM_WORKERS = 4
+WORKER_URLS = ['http://600xgrader.edx.org']*NUM_WORKERS
 
-def post_to_lms(header, body):
-    return_url = header['lms_callback_url']
-    payload = { queue_common.HEADER_TAG: json.dumps(header),
-                queue_common.BODY_TAG  : body,
-              }
-    r = requests.post(return_url, data=payload)
-    return r.text
 
-# Encapsulation of a single RabbitMQ connection and
-#    channel per thread
-#------------------------------------------------------------
+def clean_up_submission(submission):
+    '''
+    TODO: Delete files on S3
+    '''
+    return
+
+
+def post_grade_to_lms(header, body):
+    '''
+    Send grading results back to LMS
+        header:  JSON-serialized xqueue_header (string)
+        body:    grader reply (string)
+
+    Returns:
+        success: Flag indicating successful exchange (Boolean)
+    '''
+    header_dict = json.loads(header)
+    lms_callback_url = header_dict['lms_callback_url']
+
+    payload = {'xqueue_header': header, 'xqueue_body': body}
+    (success,_) = _http_post(lms_callback_url, payload) 
+
+    return success
+
+
+def _http_post(url, data):
+    '''
+    Contact external grader server, but fail gently.
+
+    Returns (success, msg), where:
+        success: Flag indicating successful exchange (Boolean)
+        msg: Accompanying message; Grader reply when successful (string)
+    '''
+    try:
+        r = requests.post(url, data=data)
+    except requests.exceptions.ConnectionError:
+        return (False, 'cannot connect to server')
+
+    if r.status_code not in [200]:
+        return (False, 'unexpected HTTP status code [%d]' % r.status_code)
+    return (True, r.text) 
+
+
 class SingleChannel(threading.Thread):
+    '''
+    Encapsulation of a single RabbitMQ queue listener
+    '''
     def __init__(self, workerID, workerURL, queue_name):
         threading.Thread.__init__(self)
         self.workerID = workerID
@@ -29,8 +77,7 @@ class SingleChannel(threading.Thread):
 
     def run(self):
         print " [%d] Starting thread for queue '%s' using %s" % (self.workerID, self.queue_name, self.workerURL)
-        connection = pika.BlockingConnection(
-                        pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
         channel = connection.channel()
         channel.queue_declare(queue=self.queue_name, durable=True)
         channel.basic_qos(prefetch_count=1)
@@ -39,27 +86,34 @@ class SingleChannel(threading.Thread):
         channel.start_consuming()
         
     def _callback(self, ch, method, properties, qitem):
-        print ' [%d] Got work from %s, dispatched to %s' %\
-            ( self.workerID, self.queue_name, self.workerURL )
-        qitem = json.loads(qitem)
-        header = json.loads(qitem.pop(queue_common.HEADER_TAG))
-        body = qitem.pop(queue_common.BODY_TAG) # Serialized data
 
-        # Send task to external server synchronously
+        submission_id = int(qitem)
         try:
-            r = requests.post(self.workerURL, data=body)
-        except Exception as err:
-            msg = 'Error %s - cannot connect to worker at %s' % (err, self.workerURL)
-            raise Exception(msg)
+            submission = Submission.objects.get(id=submission_id)
+        except Submission.DoesNotExist:
+            ch.basic_ack(delivery_tag = method.delivery_tag)
+            return # Just move on
+        
+        # Deliver job to worker
+        payload = {'xqueue_body':  submission.xqueue_body,
+                   'xqueue_files': submission.s3_urls}
 
-        # TODO: Decide if the response from the worker node is satisfactory.
-        #    If yes, send back to the LMS
-        grader_reply = r.text
-        post_to_lms(header, grader_reply)
-        print ' [%d] Job done.' % self.workerID
+        submission.grader = self.workerURL
+        submission.push_time = timezone.now()
+        (grading_success, grader_reply) = _http_post(self.workerURL, json.dumps(payload))
+        submission.return_time = timezone.now()
 
-        # Send job completion acknowledgement to queue 
+        if grading_success:
+            submission.lms_ack = post_grade_to_lms(submission.xqueue_header, grader_reply) 
+        else:
+            submission.num_failures += 1
+
+        submission.save()
+
+        # Take item off of queue. 
+        # TODO: Logic for resubmission when failed
         ch.basic_ack(delivery_tag = method.delivery_tag)
+
 
 def main():
     if (len(sys.argv) > 1):
@@ -82,6 +136,7 @@ def main():
         channels[0].join() # Wait forever. TODO: Trap Ctrl+C
     else:
         print ' [*] No workers. Exit'
+
 
 if __name__ == '__main__':
     main()

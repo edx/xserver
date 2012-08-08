@@ -4,6 +4,19 @@ ROOT_PATH = os.path.dirname(__file__)
 
 # Django settings for xqueue project.
 
+# TODO: Collection of parameters to be hooked into rest of edX system
+#------------------------------------------------------------
+# For S3
+AWS_ACCESS_KEY = 'AKIAIYY272VA3C5R4DSQ'
+AWS_SECRET_KEY = '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'
+
+# For RDS
+RDS_URL    = 'xqueue.cl0iwjvwuiai.us-east-1.rds.amazonaws.com'
+RDS_DBNAME = 'xqueue'
+RDS_USER   = 'kimth'
+RDS_PASS   = 'password'
+#------------------------------------------------------------
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -15,13 +28,13 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-#        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-#        'NAME': 'xqueue.sqlite',                      # Or path to database file if using sqlite3.
-		'ENGINE': 'django.db.backends.mysql',
-		'NAME': 'xqueue',
-        'USER': 'kimth',
-        'PASSWORD': 'password',
-        'HOST': 'xqueue.cl0iwjvwuiai.us-east-1.rds.amazonaws.com',
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': 'xqueue.sqlite',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': RDS_DBNAME,
+        'USER': RDS_USER,
+        'PASSWORD': RDS_PASS,
+        'HOST': RDS_URL,
         'PORT': '3306',
     }
 }
@@ -129,7 +142,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-	'queue',
+    'queue',
 )
 
 LOGIN_URL = '/xqueue/login'

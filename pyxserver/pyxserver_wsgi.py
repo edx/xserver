@@ -18,7 +18,11 @@ def do_GET(data):
     return "Hey, the time is %s" % strftime("%a, %d %b %Y %H:%M:%S", localtime())
 
 def do_POST(data):
-    post = json.loads(data) # Graders expect serialized data
+    payload = json.loads(data)
+    body  = payload['xqueue_body']
+    files = payload['xqueue_files'] 
+
+    post = json.loads(body)
 
     # Parse ExternalResponse interface
     cmd = post['edX_cmd']

@@ -1,10 +1,50 @@
 from django.db import models
 
-class PulledJob(models.Model):
-	pjob_key = models.CharField(max_length=256)
-	pulltime = models.DateTimeField()
-	requester = models.CharField(max_length=256)
-	qitem = models.TextField()
+import json
 
-	def __unicode__(self):
-		return 'Job pulled by %s at %s' % (self.worker, str(self.pulltime))
+CHARFIELD_LEN_SMALL = 128
+CHARFIELD_LEN_LARGE = 1024
+
+class Submission(models.Model):
+    '''
+    Representation of submission request, including metadata information
+    '''
+    
+    # Submission 
+    requester_id  = models.CharField(max_length=CHARFIELD_LEN_SMALL) # ID of LMS
+    queue_name    = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    xqueue_header = models.CharField(max_length=CHARFIELD_LEN_LARGE)
+    xqueue_body   = models.TextField()
+
+    # Uploaded files
+    s3_keys = models.CharField(max_length=CHARFIELD_LEN_LARGE) # S3 keys for internal Xqueue use
+    s3_urls = models.CharField(max_length=CHARFIELD_LEN_LARGE) # S3 urls for external access
+
+    # Timing
+    arrival_time = models.DateTimeField(auto_now=True)         # Time of arrival from LMS
+    pull_time    = models.DateTimeField(null=True, blank=True) # Time of pull request, if pulled from external grader
+    push_time    = models.DateTimeField(null=True, blank=True) # Time of push, if xqueue pushed to external grader
+    return_time  = models.DateTimeField(null=True, blank=True) # Time of return from external grader
+
+    # External pull interface
+    grader_id = models.CharField(max_length=CHARFIELD_LEN_SMALL) # ID of external grader
+    pullkey   = models.CharField(max_length=CHARFIELD_LEN_SMALL) # Secret key for external pulling interface
+    grader_reply = modelsTextField()                           # Reply from external grader
+
+    # Status
+    num_failures = models.IntegerField(default=0) # Number of failures in exchange with external grader
+    lms_ack = models.BooleanField(default=False)  # True/False on whether LMS acknowledged receipt
+
+    def __unicode__(self):
+        submission_info  = "Submission for queue '%s':\n" % self.queue_name
+        submission_info += "    Arrival time: %s\n" % self.arrival_time
+        submission_info += "    Pull time:    %s\n" % self.pull_time
+        submission_info += "    Push time:    %s\n" % self.push_time
+        submission_info += "    Return time:  %s\n" % self.return_time
+        submission_info += "    Grader:       %s\n" % self.grader
+        submission_info += "    Pullkey:      %s\n" % self.pullkey
+        submission_info += "    num_failures: %d\n" % self.num_failures
+        submission_info += "    lms_ack:      %s\n" % self.lms_ack
+        submission_info += "Xqueue header (from LMS) follows:\n"
+        submission_info += json.dumps(json.loads(self.xqueue_header), indent=4)
+        return submission_info
