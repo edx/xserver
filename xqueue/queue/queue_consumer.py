@@ -18,7 +18,8 @@ import queue_common
 from queue.models import Submission
 
 # TODO: Convenient hook for setting WORKER_URLS
-WORKER_URLS = ['http://ec2-50-16-103-147.compute-1.amazonaws.com']*2
+NUM_WORKERS = 4
+WORKER_URLS = ['http://600xgrader.edx.org']*NUM_WORKERS
 
 
 def clean_up_submission(submission):
