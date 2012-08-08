@@ -33,7 +33,7 @@ def main():
     #------------------------------------------------------------
     r = s.get(xqueue_url+'xqueue/get_queuelen/', params={'queue_name':queue_name})
     (_, queuelen) = parse_xreply(r.text)
-    print "Queue '%s' has %d awaiting jobs" % (queue_name, queuelen)
+    print "Queue '%s' has %d awaiting jobs" % (queue_name, int(queuelen))
     if queuelen < 1:
         return
 
@@ -47,14 +47,15 @@ def main():
 
     xheader = xpackage['xqueue_header'] # Xqueue callback, secret key
     xbody   = xpackage['xqueue_body']   # Grader-specific serial data
-    xfiles  = xpackage['xqueue_files']  # Dict {'filename': 'uploaded_file_url'} of student-uploaded files
+    xfiles  = xpackage['xqueue_files']  # JSON-serialized Dict {'filename': 'uploaded_file_url'} of student-uploaded files
 
-    if xfiles: # Check for any uploaded files
-        uploaded_file_url = xfiles.values()[0] # Expecting just one file for 6.00x "pyxserver"
+    xfiles_dict = json.loads(xfiles)
+    if xfiles_dict: # Check for any uploaded files
+        uploaded_file_url = xfiles_dict.values()[0] # Expecting just one file for 6.00x "pyxserver"
         r = requests.get(uploaded_file_url)
         uploaded_submission = r.text
         
-        # Surgery of payload for pyxserver, which was not (originally) expecting a file
+        # Surgery of payload for pyxserver, which is still not really expecting a file...
         xbody = json.loads(xbody)
         xbody.pop('edX_student_response')
         xbody.update({'edX_student_response': uploaded_submission})
@@ -62,7 +63,8 @@ def main():
 
     # The current 'pull_once' routine is a wrapper for the synchronous 6.00x grader (pyxserver)
     #   So, pyxserver should be running in the background...
-    r = requests.post('http://127.0.0.1:3031',data=xbody)
+    payload = {'xqueue_body': xbody, 'xqueue_files': xfiles}
+    r = requests.post('http://127.0.0.1:3031',data=json.dumps(payload))
     grader_reply = r.text # Serialized text
 
     # 3. Return graded result to xqueue
