@@ -9,4 +9,4 @@ if 'eecs1' in socket.gethostname():
 else:    
     PYXSERVER_PORT = 80
 
-PYXSERVER_LIB_PATH = '../python_lib'
+PYXSERVER_LIB_PATH = 'python_lib'
