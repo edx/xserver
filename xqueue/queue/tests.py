@@ -80,10 +80,13 @@ class lms_interface_test(unittest.TestCase):
         bad_request4 = {'xqueue_header': json.dumps({'lms_callback_url':'/',
                                                      'queue_name':'python'}),
                         'xqueue_body': 'def square(x):\n    return n**2'}
-        # 5) Arbitrary payload
-        bad_request5 = 'The capital of Mongolia is Ulaanbaatar'
+        # 5) Header is not a dict
+        bad_request5 = {'xqueue_header': json.dumps(['MIT', 'Harvard', 'Berkeley']),
+                        'xqueue_body': 'def square(x):\n    return n**2'}
+        # 6) Arbitrary payload
+        bad_request6 = 'The capital of Mongolia is Ulaanbaatar'
 
-        bad_requests = [bad_request1, bad_request2, bad_request3, bad_request4, bad_request5]
+        bad_requests = [bad_request1, bad_request2, bad_request3, bad_request4, bad_request5, bad_request6]
         for bad_request in bad_requests:
             (is_valid,_,_,_) = lms_interface._is_valid_request(bad_request)
             self.assertEqual(is_valid, False)

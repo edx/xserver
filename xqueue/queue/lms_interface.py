@@ -81,6 +81,9 @@ def _is_valid_request(xrequest):
     except (TypeError, ValueError):
         return fail
 
+    if not isinstance(header_dict, dict):
+        return fail
+
     for tag in ['lms_callback_url', 'lms_key', 'queue_name']:
         if not header_dict.has_key(tag):
             return fail

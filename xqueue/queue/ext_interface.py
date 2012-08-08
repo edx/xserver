@@ -12,7 +12,7 @@ import queue_common
 import queue_producer 
 import queue_consumer
 
-# External polling interface
+# External pull interface
 #    1) get_queuelen
 #    2) get_submission
 #    3) put_result
