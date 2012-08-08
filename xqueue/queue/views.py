@@ -27,22 +27,18 @@ def make_hashkey(seed):
 @csrf_exempt
 def log_in(request):
     if request.method == 'POST':
-        p = request.POST.dict()
+        p = request.POST.copy()
         if p.has_key('username') and p.has_key('password'):
             user = authenticate(username=p['username'], password=p['password'])
             if user is not None:
                 login(request, user)
-                return HttpResponse(compose_reply(success=True,
-                                               content='Logged in'))
+                return HttpResponse(compose_reply(True, 'Logged in'))
             else:
-                return HttpResponse(compose_reply(success=False,
-                                               content='Incorrect login credentials'))
+                return HttpResponse(compose_reply(False, 'Incorrect login credentials'))
         else:
-            return HttpResponse(compose_reply(success=False,
-                                               content='Insufficient login info'))
+            return HttpResponse(compose_reply(False, 'Insufficient login info'))
     else:
-        return HttpResponse(compose_reply(success=False,
-                                           content='login_required'))
+        return HttpResponse(compose_reply(False,'login_required'))
 
 def log_out(request):
     logout(request)

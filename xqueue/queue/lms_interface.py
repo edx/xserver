@@ -73,7 +73,7 @@ def _is_valid_request(xrequest):
     try:
         header = xrequest['xqueue_header']
         body   = xrequest['xqueue_body']
-    except KeyError:
+    except (TypeError, KeyError):
         return fail
 
     try:
