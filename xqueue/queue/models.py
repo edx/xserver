@@ -2,20 +2,23 @@ from django.db import models
 
 import json
 
-MAX_CHARFIELD_LEN = 1024
+CHARFIELD_LEN_SMALL = 128
+CHARFIELD_LEN_LARGE = 1024
 
 class Submission(models.Model):
     '''
     Representation of submission request, including metadata information
     '''
+    
     # Submission 
-    queue_name    = models.CharField(max_length=MAX_CHARFIELD_LEN)
-    xqueue_header = models.CharField(max_length=MAX_CHARFIELD_LEN)
+    requester_id  = models.CharField(max_length=CHARFIELD_LEN_SMALL) # ID of LMS
+    queue_name    = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    xqueue_header = models.CharField(max_length=CHARFIELD_LEN_LARGE)
     xqueue_body   = models.TextField()
 
     # Uploaded files
-    s3_keys = models.CharField(max_length=MAX_CHARFIELD_LEN) # S3 keys for internal Xqueue use
-    s3_urls = models.CharField(max_length=MAX_CHARFIELD_LEN) # S3 urls for external access
+    s3_keys = models.CharField(max_length=CHARFIELD_LEN_LARGE) # S3 keys for internal Xqueue use
+    s3_urls = models.CharField(max_length=CHARFIELD_LEN_LARGE) # S3 urls for external access
 
     # Timing
     arrival_time = models.DateTimeField(auto_now=True)         # Time of arrival from LMS
@@ -24,8 +27,9 @@ class Submission(models.Model):
     return_time  = models.DateTimeField(null=True, blank=True) # Time of return from external grader
 
     # External pull interface
-    grader  = models.CharField(max_length=MAX_CHARFIELD_LEN) # ID of external grader
-    pullkey = models.CharField(max_length=MAX_CHARFIELD_LEN) # Secret key for external pulling interface
+    grader_id = models.CharField(max_length=CHARFIELD_LEN_SMALL) # ID of external grader
+    pullkey   = models.CharField(max_length=CHARFIELD_LEN_SMALL) # Secret key for external pulling interface
+    grader_reply = modelsTextField()                           # Reply from external grader
 
     # Status
     num_failures = models.IntegerField(default=0) # Number of failures in exchange with external grader
@@ -38,6 +42,7 @@ class Submission(models.Model):
         submission_info += "    Push time:    %s\n" % self.push_time
         submission_info += "    Return time:  %s\n" % self.return_time
         submission_info += "    Grader:       %s\n" % self.grader
+        submission_info += "    Pullkey:      %s\n" % self.pullkey
         submission_info += "    num_failures: %d\n" % self.num_failures
         submission_info += "    lms_ack:      %s\n" % self.lms_ack
         submission_info += "Xqueue header (from LMS) follows:\n"
