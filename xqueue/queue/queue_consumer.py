@@ -76,8 +76,7 @@ class SingleChannel(threading.Thread):
 
     def run(self):
         print " [%d] Starting thread for queue '%s' using %s" % (self.workerID, self.queue_name, self.workerURL)
-        connection = pika.BlockingConnection(
-                        pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
         channel = connection.channel()
         channel.queue_declare(queue=self.queue_name, durable=True)
         channel.basic_qos(prefetch_count=1)
@@ -104,9 +103,7 @@ class SingleChannel(threading.Thread):
         submission.return_time = timezone.now()
 
         if grading_success:
-            lms_success = post_grade_to_lms(submission.xqueue_header, grader_reply) 
-            if lms_success:
-                submission.lms_ack = True
+            submission.lms_ack = post_grade_to_lms(submission.xqueue_header, grader_reply) 
         else:
             submission.num_failures += 1
 

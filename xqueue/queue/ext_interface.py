@@ -3,11 +3,10 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 
-import hashlib
 import json
 import pika
 
-from queue.models import PulledJob
+from queue.models import Submission 
 from queue.views import compose_reply, make_hashkey
 import queue_common
 import queue_producer 
@@ -29,82 +28,66 @@ def get_queuelen(request):
         queue_name = str(g['queue_name'])
         if queue_name in queue_common.QUEUES:
             job_count = queue_producer.push_to_queue(queue_name)
-            return HttpResponse(compose_reply(success=True, content=job_count))
-        else:    
-            # Queue name incorrect: List all queues
-            return HttpResponse(compose_reply(success=False, 
-                                              content='Valid queue names are: '+' '.join(queue_common.QUEUES)))
-    
-    return HttpResponse(compose_reply(success=False,
-                                      content="'get_queuelen' must provide parameter 'queue_name'"))
+            return HttpResponse(compose_reply(True, job_count))
+        else: # Queue name incorrect: List all queues    
+            return HttpResponse(compose_reply(False, 'Valid queue names are: '+' '.join(queue_common.QUEUES)))
+    return HttpResponse(compose_reply(False, "'get_queuelen' must provide parameter 'queue_name'"))
 
 @login_required
 def get_submission(request):
     '''
-    Retrieves a student submission from queue named by GET['queue_name'].
-    The submission is pulled out from the queue, but is tracked in a separate 
-        database in xqueue
+    Retrieve a single submission from queue named by GET['queue_name'].
     '''
     g = request.GET.copy()
-    if 'queue_name' in g:
+    if 'queue_name' not in g:
+        return HttpResponse(compose_reply(False, "'get_submission' must provide parameter 'queue_name'"))
+    else:
         queue_name = str(g['queue_name'])
         if queue_name not in queue_common.QUEUES:
-            return HttpResponse(compose_reply(success=False,
-                                              content="Queue '%s' not found" % queue_name))
+            return HttpResponse(compose_reply(False, "Queue '%s' not found" % queue_name))
         else:
             # Pull a single submission (if one exists) from the named queue
             connection = pika.BlockingConnection(pika.ConnectionParameters(host=queue_common.RABBIT_HOST))
             channel = connection.channel()
             channel.queue_declare(queue=queue_name, durable=True)
 
-            # 'qitem' is the queued item. We expect it to be the serialized
-            #   form of the following dict:
-            #   { 'xqueue_header': serialized_xqueue_header,
-            #     'xqueue_body'  : serialized_xqueue_body,
-            #     'xqueue_footer': {'files': files, ...} (dict!)
-            #   }
+            # qitem is the item from the queue
             method, header, qitem = channel.basic_get(queue=queue_name)
 
             if method.NAME == 'Basic.GetEmpty': # Got nothing
-                return HttpResponse(compose_reply(success=False,
-                                                  content="Queue '%s' is empty" % queue_name))
+                return HttpResponse(compose_reply(False, "Queue '%s' is empty" % queue_name))
             else:
-                # Info on pull requester
-                requester = request.META['REMOTE_ADDR']
-                pulltime = timezone.now()
-                print 'Pull request from %s at %s' % (requester, str(pulltime))
+                submission_id = int(qitem)
+                try:
+                    submission = Submission.objects.get(id=submission_id)
+                except Submission.DoesNotExist:
+                    channel.basic_ack(method.delivery_tag)
+                    return HttpResponse(compose_reply(False, "Error with queued submission. Please try again"))
 
-                # Track the pull request in our database
-                # TODO: Switch to Submission database
-                pjob_key = make_hashkey(str(pulltime)+qitem)
-                pjob = PulledJob(pjob_key=pjob_key,
-                                 pulltime=pulltime,
-                                 requester=requester,
-                                 qitem=qitem) # qitem is serialized
-                pjob.save()
+                # Collect info on pull event
+                grader    = request.META['REMOTE_ADDR']
+                pull_time = timezone.now()
+                pullkey   = make_hashkey(str(pull_time)+qitem)
+                
+                submission.grader    = grader
+                submission.pull_time = pull_time
+                submission.pullkey   = pullkey 
+                
+                submission.save()
 
-                # Deliver sanitized qitem to the requester:
-                #    1) Remove header originating from the LMS, and replace
-                #         with header relevant for Xqueue <--> External grader
-                #    2) Remove footer originating from inside Xqueue
-                qitem = json.loads(qitem) # De-serialize qitem
-                qitem.pop(queue_common.HEADER_TAG)
-                footer = qitem.pop(queue_common.FOOTER_TAG)
-
-                header = { 'submission_id' : pjob.id,
-                           'submission_key': pjob_key, } 
-
-                qitem.update({queue_common.HEADER_TAG: json.dumps(header)})
-                qitem.update({'xqueue_files': footer['files']})
+                # Prepare payload to external grader
+                ext_header = {'submission_id':submission_id, 'submission_key':pullkey} 
+                
+                payload = {'xqueue_header': json.dumps(ext_header),
+                           'xqueue_body': submission.xqueue_body,
+                           'xqueue_files': submission.s3_urls} 
 
                 channel.basic_ack(method.delivery_tag)
-                return HttpResponse(compose_reply(success=True,
-                                                  content=json.dumps(qitem)))
+
+                return HttpResponse(compose_reply(True,content=json.dumps(payload)))
 
             connection.close()
 
-    return HttpResponse(compose_reply(success=False,
-                                      content="'get_submission' must provide parameter 'queue_name'"))
 
 @csrf_exempt
 @login_required
@@ -112,28 +95,63 @@ def put_result(request):
     '''
     Graders post their results here.
     '''
-    if request.method == 'POST':
-        p = request.POST.dict()
-        ext_header = json.loads(p[queue_common.HEADER_TAG])
-
-        # Extract from the record of pulled jobs
-        try:
-            pjob_id = ext_header['submission_id']
-            pjob = PulledJob.objects.get(id=pjob_id)
-        except PulledJob.DoesNotExist:
-            return HttpResponse(compose_reply(success=False,
-                                              content='Pulled job does not exist in Xqueue records'))
-        
-        if pjob.pjob_key != ext_header['submission_key']:
-            return HttpResponse(compose_reply(success=False,
-                                              content='Pulled job key does not match database'))
-
-        qitem = pjob.qitem # Original queued item
-        qitem = json.loads(qitem)
-        lms_header = json.loads(qitem[queue_common.HEADER_TAG])
-        queue_consumer.post_to_lms(lms_header, p[queue_common.BODY_TAG])
-
-        return HttpResponse(compose_reply(success=True, content=''))
+    if request.method != 'POST':
+        return HttpResponse(compose_reply(False, "'put_result' must use HTTP POST"))
     else:
-        return HttpResponse(compose_reply(success=False,
-                                          content="'put_result' must use HTTP POST"))
+        post = request.POST.copy()
+        (reply_is_valid, submission_id, submission_key, grader_reply) = _is_valid_reply(post)
+
+        if not reply_is_valid:
+            return HttpResponse(compose_reply(False, 'Incorrect reply format'))
+        else:
+            try:
+                submission = Submission.objects.get(id=submission_id)
+            except Submission.DoesNotExist:
+                return HttpResponse(compose_reply(False,'Submission does not exist'))
+
+            if submission.pullkey and submission_key != submission.pullkey:
+                return HttpResponse(compose_reply(False,'Incorrect key for submission'))
+            
+            submission.return_time = timezone.now()
+            submission.pullkey = '' 
+
+            # Deliver grading results to LMS
+            submission.lms_ack = queue_consumer.post_grade_to_lms(submission.xqueue_header, grader_reply)
+
+            print submission
+            submission.save()
+
+            return HttpResponse(compose_reply(success=True, content=''))
+
+def _is_valid_reply(external_reply):
+    '''
+    Check if external reply is in the right format
+        1) Presence of 'xqueue_header' and 'xqueue_body'
+        2) Presence of specific metadata in 'xqueue_header'
+            ['submission_id', 'submission_key']
+
+    Returns:
+        is_valid:       Flag indicating success (Boolean)
+        submission_id:  Graded submission's database ID in Xqueue (int)
+        submission_key: Secret key to match against Xqueue database (string)
+        score_msg:      Grading result from external grader (string)
+    '''
+    fail = (False,-1,'','')
+    try:
+        header    = external_reply['xqueue_header']
+        score_msg = external_reply['xqueue_body']
+    except KeyError:
+        return fail
+
+    try:
+        header_dict = json.loads(header)
+    except (TypeError, ValueError):
+        return fail
+
+    for tag in ['submission_id', 'submission_key']:
+        if not header_dict.has_key(tag):
+            return fail
+
+    submission_id  = int(header_dict['submission_id'])
+    submission_key = header_dict['submission_key'] 
+    return (True, submission_id, submission_key, score_msg) 

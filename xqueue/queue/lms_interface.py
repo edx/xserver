@@ -61,6 +61,7 @@ def _is_valid_request(xrequest):
     Check if xrequest is a valid request for Xqueue. Checks:
         1) Presence of 'xqueue_header' and 'xqueue_body'
         2) Presence of specific metadata in 'xqueue_header'
+            ['lms_callback_url', 'lms_key', 'queue_name']
 
     Returns:
         is_valid:   Flag indicating success (Boolean)
@@ -68,20 +69,21 @@ def _is_valid_request(xrequest):
         header:     Header portion of xrequest (string)
         body:       Body portion of xrequest (string)
     '''
+    fail = (False, '', '', '')
     try:
         header = xrequest['xqueue_header']
         body   = xrequest['xqueue_body']
     except KeyError:
-        return (False, '', '', '')
+        return fail
 
     try:
         header_dict = json.loads(header)
     except (TypeError, ValueError):
-        return (False, '', '', '')
+        return fail
 
     for tag in ['lms_callback_url', 'lms_key', 'queue_name']:
         if not header_dict.has_key(tag):
-            return (False, '', '', '')
+            return fail
 
     queue_name = str(header_dict['queue_name']) # Important: Queue name must be str!
     return (True, queue_name, header, body)
