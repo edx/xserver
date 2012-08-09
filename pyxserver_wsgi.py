@@ -5,7 +5,7 @@
 #
 # Re-wrapped pyxserver to be compatible with nginx + (uWSGI or gunicorn)
 #
-# Run me with (may need sudo privilege for logging):
+# Run me with (may need su privilege for logging):
 #        gunicorn -w 4 -b 127.0.0.1:3031 pyxserver_wsgi:application
 #------------------------------------------------------------
 
