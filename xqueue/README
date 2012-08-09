@@ -1,3 +1,0 @@
-Two programs are contained in this directory:
-	1) Django server for handling xqueue HTTP server (run.sh)
-	2) Python app for consuming requests (queue/queue_consumer.py)
