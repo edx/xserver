@@ -29,22 +29,22 @@ class Submission(models.Model):
     # External pull interface
     grader_id = models.CharField(max_length=CHARFIELD_LEN_SMALL) # ID of external grader
     pullkey   = models.CharField(max_length=CHARFIELD_LEN_SMALL) # Secret key for external pulling interface
-    grader_reply = modelsTextField()                           # Reply from external grader
+    grader_reply = models.TextField()                            # Reply from external grader
 
     # Status
     num_failures = models.IntegerField(default=0) # Number of failures in exchange with external grader
     lms_ack = models.BooleanField(default=False)  # True/False on whether LMS acknowledged receipt
 
     def __unicode__(self):
-        submission_info  = "Submission for queue '%s':\n" % self.queue_name
+        submission_info  = "Submission from %s for queue '%s':\n" % (self.requester_id, self.queue_name)
         submission_info += "    Arrival time: %s\n" % self.arrival_time
         submission_info += "    Pull time:    %s\n" % self.pull_time
         submission_info += "    Push time:    %s\n" % self.push_time
         submission_info += "    Return time:  %s\n" % self.return_time
-        submission_info += "    Grader:       %s\n" % self.grader
+        submission_info += "    Grader_id:    %s\n" % self.grader_id
         submission_info += "    Pullkey:      %s\n" % self.pullkey
         submission_info += "    num_failures: %d\n" % self.num_failures
         submission_info += "    lms_ack:      %s\n" % self.lms_ack
-        submission_info += "Xqueue header (from LMS) follows:\n"
+        submission_info += "Original Xqueue header follows:\n"
         submission_info += json.dumps(json.loads(self.xqueue_header), indent=4)
         return submission_info

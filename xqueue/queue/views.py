@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse 
 from django.views.decorators.csrf import csrf_exempt
 
-import hashlib
 import json
 
 # Xqueue reply format:
@@ -17,10 +16,6 @@ def compose_reply(success, content):
     return json.dumps({ 'return_code': return_code,
                         'content': content })
 
-def make_hashkey(seed):
-    h = hashlib.md5()
-    h.update(str(seed))
-    return h.hexdigest()
 
 # Log in
 #--------------------------------------------------

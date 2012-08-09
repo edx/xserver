@@ -8,7 +8,9 @@ from boto.s3.key import Key
 import json
 
 from queue.models import Submission
-from queue.views import compose_reply, make_hashkey
+from queue.views import compose_reply
+from util import *
+
 import queue_common
 import queue_producer 
 
@@ -21,10 +23,8 @@ def submit(request):
     if request.method != 'POST':
         return HttpResponse(compose_reply(False, 'Queue requests should use HTTP POST'))
     else:
-        xrequest = request.POST.copy()
-        
         # queue_name, xqueue_header, xqueue_body are all serialized
-        (request_is_valid, queue_name, xqueue_header, xqueue_body) = _is_valid_request(xrequest)
+        (request_is_valid, queue_name, xqueue_header, xqueue_body) = _is_valid_request(request.POST)
 
         if not request_is_valid: 
             return HttpResponse(compose_reply(False, 'Queue request has invalid format'))
@@ -37,12 +37,13 @@ def submit(request):
                 s3_urls = dict() # For external grader use
                 for filename in request.FILES.keys():
                     s3_key = make_hashkey(xqueue_header+filename)
-                    s3_url = _upload_to_s3(request.FILES[filename],s3_key)
+                    s3_url = _upload_to_s3(request.FILES[filename],s3_key) # TODO: Sanity check on file (e.g. size)
                     s3_keys.update({filename: s3_key})
                     s3_urls.update({filename: s3_url})
 
                 # Track the submission in the Submission database
-                submission = Submission(queue_name=queue_name,
+                submission = Submission(requester_id=get_request_ip(request),    
+                                        queue_name=queue_name,
                                         xqueue_header=xqueue_header,
                                         xqueue_body=xqueue_body,
                                         s3_urls=json.dumps(s3_urls),
