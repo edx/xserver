@@ -36,8 +36,18 @@ def do_POST(data):
         student_response = post['edX_student_response']
         award, message = pyxserver.run_code_sandbox(processor, student_response, tests)
 
+        '''
+        # ExternalResponse reply format 
         reply_template = "<edxgrade><awarddetail>%s</awarddetail><message><![CDATA[%s]]></message><awarded></awarded></edxgrade>"
         reply = reply_template % (award, message)
+        '''
+
+        # "External grader" reply format, following discussion with Berkeley and Harvard
+        reply = { 'correct': award=='EXACT_ANS',
+                  'score': -1, # TODO: Partial grading
+                  'msg': message }
+
+        return json.dumps(reply)
 
     elif cmd == 'get_answers':
         expected, message = pyxserver.run_code_sandbox(processor, "", tests, getans=True)
