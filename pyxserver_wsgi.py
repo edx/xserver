@@ -9,9 +9,12 @@ from lxml import etree
 from time import localtime, strftime 
 
 import pyxserver
+import logging
+
 
 def do_GET(data):
     return "Hey, the time is %s" % strftime("%a, %d %b %Y %H:%M:%S", localtime())
+
 
 def do_POST(data):
     # This server expects jobs to be pushed to it from the queue
@@ -41,18 +44,18 @@ def do_POST(data):
 
     return json.dumps(reply)
 
-
 # Entry point
 def application(env, start_response):
+    logging.basicConfig()
 
     # Handle request
     method = env['REQUEST_METHOD']
     data = env['wsgi.input'].read()
 
-    print '-'*60
+    print '-' * 60
     print method
 
-    handlers = { 'GET' : do_GET,
+    handlers = {'GET': do_GET,
                  'POST': do_POST,
                  }
     if method in handlers.keys():
