@@ -14,8 +14,7 @@ import requests
 #    3) put_result:     Return the results of a submission
 #------------------------------------------------------------
 def main():
-    #xqueue_url = 'http://xqueue.edx.org/'
-    xqueue_url = 'http://ec2-50-17-47-60.compute-1.amazonaws.com/'
+    xqueue_url = 'http://xqueue.edx.org/'
     if len(sys.argv) > 1:
         queue_name = sys.argv[1]
     else:
