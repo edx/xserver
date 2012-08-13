@@ -14,7 +14,8 @@ import requests
 #    3) put_result:     Return the results of a submission
 #------------------------------------------------------------
 def main():
-    xqueue_url = 'http://xqueue.edx.org/'
+    #xqueue_url = 'http://xqueue.edx.org/'
+    xqueue_url = 'http://ec2-50-17-47-60.compute-1.amazonaws.com/'
     if len(sys.argv) > 1:
         queue_name = sys.argv[1]
     else:
@@ -57,8 +58,8 @@ def main():
         
         # Surgery of payload for pyxserver, which is still not really expecting a file...
         xbody = json.loads(xbody)
-        xbody.pop('edX_student_response')
-        xbody.update({'edX_student_response': uploaded_submission})
+        xbody.pop('student_response')
+        xbody.update({'student_response': uploaded_submission})
         xbody = json.dumps(xbody)
 
     # The current 'pull_once' routine is a wrapper for the synchronous 6.00x grader (pyxserver)
