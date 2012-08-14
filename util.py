@@ -23,11 +23,11 @@ def incr_key(dict,key,delta):
 def tut_icon(name):
     'Return HTML code for various tutor icons'
     if name=='checkmark':
-        return '&nbsp;<img src="http://sicp-s3.mit.edu/tutorexport/images/checkmrk-small.jpg" align="top" alt="WELL DONE"/>\n'
+        return '<span class="correct"></span>'
     if name=='wrong':
-        return '&nbsp;<img src="http://sicp-s3.mit.edu/tutorexport/images/xncircle-small.jpg" align="top" alt="WRONG"/>'
-    if name=='question':
-        return '&nbsp;<img src="http://sicp-s3.mit.edu/tutorexport/images/qmrk-small.gif" align="top" alt="NO ANSWER"/>\n'
+        return '<span class="incorrect"></span>'
+    if name=='question': # TODO: Does this get called in 6.00x?
+        return '<span class="incorrect"></span>'
     return ''
 
 def c_str(s,color):
