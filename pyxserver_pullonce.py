@@ -57,8 +57,8 @@ def main():
         
         # Surgery of payload for pyxserver, which is still not really expecting a file...
         xbody = json.loads(xbody)
-        xbody.pop('edX_student_response')
-        xbody.update({'edX_student_response': uploaded_submission})
+        xbody.pop('student_response')
+        xbody.update({'student_response': uploaded_submission})
         xbody = json.dumps(xbody)
 
     # The current 'pull_once' routine is a wrapper for the synchronous 6.00x grader (pyxserver)
