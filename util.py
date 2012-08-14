@@ -27,7 +27,7 @@ def tut_icon(name):
     if name=='wrong':
         return '<span class="incorrect"></span>'
     if name=='question': # TODO: Does this get called in 6.00x?
-        return '&nbsp;<img src="http://sicp-s3.mit.edu/tutorexport/images/qmrk-small.gif" align="top" alt="NO ANSWER"/>\n'
+        return '<span class="incorrect"></span>'
     return ''
 
 def c_str(s,color):
