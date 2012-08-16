@@ -1,20 +1,26 @@
 #!/usr/bin/python
+from requests.auth import HTTPBasicAuth
+
 import json
 import sys
 import requests
 
-#------------------------------------------------------------
-# Simple demo of the (asynchronous) external grading interface,
-#   and uploaded file access
-#
-# Xqueue API consists of:
-#    0) login:          Log in
-#    1) get_queuelen:   Get length of specific queue
-#    2) get_submission: Get single submission from a specific queue
-#    3) put_result:     Return the results of a submission
-#------------------------------------------------------------
+# Info for Xqueue sandbox
+xqueue_url = 'https://sandbox-xqueue.edx.org'
+django_auth = {'username': 'lms', 'password': '***REMOVED***'}
+requests_auth = HTTPBasicAuth('anant','agarwal')
+
 def main():
-    xqueue_url = 'http://xqueue.edx.org/'
+    '''
+    Demo of the (asynchronous) external grading interface,
+        and uploaded file access
+
+    Xqueue API consists of:
+        0) login:          Log in
+        1) get_queuelen:   Get length of specific queue
+        2) get_submission: Get single submission from a specific queue
+        3) put_result:     Return the results of a submission
+    '''
     if len(sys.argv) > 1:
         queue_name = sys.argv[1]
     else:
@@ -22,27 +28,28 @@ def main():
 
     # 0. Log in
     #------------------------------------------------------------
-    s = requests.session()
-    r = s.post(xqueue_url+'xqueue/login/', data={'username':'kimth','password':'password'})
+    s = requests.session(auth=requests_auth)
+
+    r = s.post(xqueue_url+'/xqueue/login/', data=django_auth)
     (error, msg) = parse_xreply(r.text)
+    print msg
     if error: # We'll assume no error code for the remainder of the demo
-        print msg
         return
 
     # 1. Get length of queue
     #------------------------------------------------------------
-    r = s.get(xqueue_url+'xqueue/get_queuelen/', params={'queue_name':queue_name})
+    r = s.get(xqueue_url+'/xqueue/get_queuelen/', params={'queue_name':queue_name})
     (_, queuelen) = parse_xreply(r.text)
-    print "Queue '%s' has %d awaiting jobs" % (queue_name, int(queuelen))
+    queuelen = int(queuelen)
+    print "Queue '%s' has %d awaiting jobs" % (queue_name, queuelen)
     if queuelen < 1:
         return
 
     # 2. Contact xqueue and get a student submission
     #------------------------------------------------------------
-    r = s.get(xqueue_url+'xqueue/get_submission/', params={'queue_name':queue_name})
+    r = s.get(xqueue_url+'/xqueue/get_submission/', params={'queue_name':queue_name})
     (_, xpackage) = parse_xreply(r.text)
 
-    # Deserialize the package
     xpackage = json.loads(xpackage)
 
     xheader = xpackage['xqueue_header'] # Xqueue callback, secret key
@@ -71,7 +78,7 @@ def main():
     #------------------------------------------------------------
     returnpackage = {'xqueue_header': xheader,
                      'xqueue_body'  : grader_reply,}
-    r = s.post(xqueue_url+'xqueue/put_result/', data=returnpackage)
+    r = s.post(xqueue_url+'/xqueue/put_result/', data=returnpackage)
 
 
 def parse_xreply(xreply_str):
