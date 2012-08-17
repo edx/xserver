@@ -122,6 +122,7 @@ class MyHandler(BaseHTTPRequestHandler):
             #return
 
             pdict = self.body
+            print pdict.keys()
 
             cmd = str(pdict.get('edX_cmd', '')[0]).strip()
             tests = pdict['edX_tests'][0]
