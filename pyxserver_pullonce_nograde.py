@@ -60,38 +60,18 @@ def main():
     xbody   = xpackage['xqueue_body']   # Grader-specific serial data
     xfiles  = xpackage['xqueue_files']  # JSON-serialized Dict {'filename': 'uploaded_file_url'} of student-uploaded files
 
-    xfiles_dict = json.loads(xfiles)
-    print json.dumps(xfiles_dict, indent=4)
-
-    if xfiles_dict: # Check for any uploaded files
-        for filename in xfiles_dict.keys():
-            print filename
-            r = requests.get(xfiles_dict[filename])
-            print r
-            print r.text
-
-        uploaded_file_url = xfiles_dict.values()[0] # Expecting just one file for 6.00x "pyxserver"
-        r = requests.get(uploaded_file_url)
-        uploaded_submission = r.text
-        
-        # Surgery of payload for pyxserver, which is still not really expecting a file...
-        xbody = json.loads(xbody)
-        xbody.pop('student_response')
-        xbody.update({'student_response': uploaded_submission})
-        xbody = json.dumps(xbody)
-
-    # The current 'pull_once' routine is a wrapper for the synchronous 6.00x grader (pyxserver)
-    #   So, pyxserver should be running in the background...
-    payload = {'xqueue_body': xbody, 'xqueue_files': xfiles}
-    r = requests.post('http://127.0.0.1:3031',data=json.dumps(payload))
-    grader_reply = r.text # Serialized text
+    grader_reply = { 'correct': True,
+                     'score': 10,
+                     'msg': 'No grading performed!' }
+    grader_reply = json.dumps(grader_reply)
 
     # 3. Return graded result to xqueue
     #------------------------------------------------------------
     returnpackage = {'xqueue_header': xheader,
                      'xqueue_body'  : grader_reply,}
     r = s.post(xqueue_url+'/xqueue/put_result/', data=returnpackage)
-
+    print r
+    print r.text
 
 def parse_xreply(xreply_str):
     try:
