@@ -73,7 +73,7 @@ def main():
         </div>
 
         <div class="longform">
-            <div class="longfrom-header">
+            <div class="longform-header">
                 <p>This is an into to the long form</p>
             </div>
             <div class="longform-body">
