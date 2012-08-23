@@ -60,9 +60,35 @@ def main():
     xbody   = xpackage['xqueue_body']   # Grader-specific serial data
     xfiles  = xpackage['xqueue_files']  # JSON-serialized Dict {'filename': 'uploaded_file_url'} of student-uploaded files
 
+    #msg = '<div class="test">Hello</div>'
+    msg = '''
+<div class="external-grader-message">
+    <div class="test">
+        <header>
+            <h3>Test title #1</h3>
+        </header>
+
+        <div class="shortform">
+            <p>Short form test info here</p>
+        </div>
+
+        <div class="longform">
+            <div class="longfrom-header">
+                <p>This is an into to the long form</p>
+            </div>
+            <div class="longform-body">
+                <p>This is the rest of the long form information</p>
+                <p>This is the rest of the long form information</p>
+                <p>This is the rest of the long form information</p>
+            </div>
+        </div>
+    </div>
+</div>
+'''
+
     grader_reply = { 'correct': True,
                      'score': 10,
-                     'msg': 'No grading performed!' }
+                     'msg': msg }
     grader_reply = json.dumps(grader_reply)
 
     # 3. Return graded result to xqueue
