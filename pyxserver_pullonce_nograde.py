@@ -14,6 +14,9 @@ requests_auth = HTTPBasicAuth('anant','agarwal')
 #xqueue_url = 'http://ec2-23-20-116-174.compute-1.amazonaws.com'
 #django_auth = {'username': 'lms', 'password': 'pass'}
 
+def compose_grader_reply(title, shortform, longform-header, longform):
+    return '' 
+
 def main():
     '''
     Demo of the (asynchronous) external grading interface,
@@ -62,25 +65,43 @@ def main():
 
     #msg = '<div class="test">Hello</div>'
     msg = '''
-<div class="external-grader-message">
-    <div class="test">
-        <header>
-            <h3>Test title #1</h3>
-        </header>
+<div class="test">
+    <header>
+        <h3>Test title #1</h3>
+    </header>
 
-        <div class="shortform">
-            <p>Short form test info here</p>
+    <div class="shortform">
+        <p>Short form test info here</p>
+    </div>
+
+    <div class="longform">
+        <div class="longform-header">
+            <p>This is an into to the long form</p>
         </div>
+        <div class="longform-body">
+            <p>This is the rest of the long form information</p>
+            <p>This is the rest of the long form information</p>
+            <p>This is the rest of the long form information</p>
+        </div>
+    </div>
+</div>
+<div class="test">
+    <header>
+        <h3>Test title #2</h3>
+    </header>
 
-        <div class="longform">
-            <div class="longform-header">
-                <p>This is an into to the long form</p>
-            </div>
-            <div class="longform-body">
-                <p>This is the rest of the long form information</p>
-                <p>This is the rest of the long form information</p>
-                <p>This is the rest of the long form information</p>
-            </div>
+    <div class="shortform">
+        <p>Short form test info here</p>
+    </div>
+
+    <div class="longform">
+        <div class="longform-header">
+            <p>This is an into to the long form</p>
+        </div>
+        <div class="longform-body">
+            <p>This is the rest of the long form information</p>
+            <p>This is the rest of the long form information</p>
+            <p>This is the rest of the long form information</p>
         </div>
     </div>
 </div>
