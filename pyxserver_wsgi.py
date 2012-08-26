@@ -36,6 +36,7 @@ def do_POST(data):
     award, message = pyxserver.run_code_sandbox(processor, student_response, tests)
 
     # "External grader" reply format
+    message = '<span>' + message + '</span>'
     correct = award == 'EXACT_ANS'
     points = 1 if correct else 0
     reply = { 'correct': correct,
