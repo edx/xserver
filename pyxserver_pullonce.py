@@ -60,6 +60,7 @@ def main():
     xbody   = xpackage['xqueue_body']   # Grader-specific serial data
     xfiles  = xpackage['xqueue_files']  # JSON-serialized Dict {'filename': 'uploaded_file_url'} of student-uploaded files
 
+    print json.dumps(json.loads(xbody), indent=4)
     xfiles_dict = json.loads(xfiles)
     print json.dumps(xfiles_dict, indent=4)
 
