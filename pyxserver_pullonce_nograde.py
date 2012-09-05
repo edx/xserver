@@ -14,9 +14,6 @@ requests_auth = HTTPBasicAuth('anant','agarwal')
 #xqueue_url = 'http://ec2-23-20-116-174.compute-1.amazonaws.com'
 #django_auth = {'username': 'lms', 'password': 'pass'}
 
-def compose_grader_reply(title, shortform, longform_header, longform):
-    return '' 
-
 def main():
     '''
     Demo of the (asynchronous) external grading interface,

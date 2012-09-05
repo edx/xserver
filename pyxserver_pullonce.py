@@ -36,7 +36,6 @@ def main():
 
     r = s.post(xqueue_url+'/xqueue/login/', data=django_auth)
     (error, msg) = parse_xreply(r.text)
-    print msg
     if error: # We'll assume no error code for the remainder of the demo
         return
 
@@ -60,7 +59,6 @@ def main():
     xbody   = xpackage['xqueue_body']   # Grader-specific serial data
     xfiles  = xpackage['xqueue_files']  # JSON-serialized Dict {'filename': 'uploaded_file_url'} of student-uploaded files
 
-    print json.dumps(json.loads(xbody), indent=4)
     xfiles_dict = json.loads(xfiles)
     print json.dumps(xfiles_dict, indent=4)
 
