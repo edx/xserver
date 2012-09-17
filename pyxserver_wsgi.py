@@ -11,6 +11,43 @@ from time import localtime, strftime
 import pyxserver
 import logging
 
+def _compose_single_test(test):
+    '''
+    Generate the return payload for a single external grader test.
+
+    Param 'test' is a dict with keys:
+        'title':
+        'shortform': Short (~1 sentence) summary of test
+        'longform':  Long output that is initially collapsed
+    '''
+    test_msg = '<div class="test">'
+    if 'title' in test:
+        test_msg += '<header><h3>'
+        test_msg += test['title']
+        test_msg += '</h3></header>'
+
+    test_msg += '<section>'
+    if 'shortform' in test:
+        test_msg += '<div class="shortform">'
+        test_msg += test['shortform']
+        test_msg += '</div>'
+
+    if 'longform' in test:
+        test_msg += '<div class="longform">'
+        test_msg += test['longform']
+        test_msg += '</div>'
+
+    test_msg += '</section>'
+    test_msg += '</div>'
+    return test_msg 
+
+def compose_score_msg(tests):
+    score_msg = '<div>'
+    for test in tests:
+        score_msg += _compose_single_test(test)
+    score_msg += '</div>'
+    return score_msg
+
 
 def do_GET(data):
     return "Hey, the time is %s" % strftime("%a, %d %b %Y %H:%M:%S", localtime())
@@ -36,11 +73,20 @@ def do_POST(data):
     award, message = pyxserver.run_code_sandbox(processor, student_response, tests)
 
     # "External grader" reply format
+    message = '<span>' + message + '</span>'
     correct = award == 'EXACT_ANS'
     points = 1 if correct else 0
+
+    # Make valid XML message
+    test = { 'title': '6.00x Pyxserver', 
+             'shortform': award,
+             'longform': message }
+    tests = [test]
+    score_msg = compose_score_msg(tests)
+
     reply = { 'correct': correct,
               'score': points, 
-              'msg': message }
+              'msg': score_msg }
 
     return json.dumps(reply)
 

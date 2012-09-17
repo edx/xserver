@@ -36,7 +36,6 @@ def main():
 
     r = s.post(xqueue_url+'/xqueue/login/', data=django_auth)
     (error, msg) = parse_xreply(r.text)
-    print msg
     if error: # We'll assume no error code for the remainder of the demo
         return
 
@@ -60,33 +59,24 @@ def main():
     xbody   = xpackage['xqueue_body']   # Grader-specific serial data
     xfiles  = xpackage['xqueue_files']  # JSON-serialized Dict {'filename': 'uploaded_file_url'} of student-uploaded files
 
-    #msg = '<div class="test">Hello</div>'
     msg = '''
-<div class="external-grader-message">
-    <div class="test">
-        <header>
-            <h3>Test title #1</h3>
-        </header>
-
-        <div class="shortform">
-            <p>Short form test info here</p>
-        </div>
-
-        <div class="longform">
-            <div class="longform-header">
-                <p>This is an into to the long form</p>
-            </div>
-            <div class="longform-body">
-                <p>This is the rest of the long form information</p>
-                <p>This is the rest of the long form information</p>
-                <p>This is the rest of the long form information</p>
-            </div>
-        </div>
+<div class="test">
+    <header>
+        <h3>Autograder results</h3>
+    </header>
+    <section>
+    <div class="shortform">
+        <p>Hello world</p>
     </div>
+
+    <div class="longform">
+        <p>Hello, my name is Spirte and I am a lime-flavored drink from the Coca-Cola Company</p>
+    </div>
+    </section>
 </div>
 '''
 
-    grader_reply = { 'correct': True,
+    grader_reply = { 'correct': False,
                      'score': 10,
                      'msg': msg }
     grader_reply = json.dumps(grader_reply)
@@ -96,8 +86,6 @@ def main():
     returnpackage = {'xqueue_header': xheader,
                      'xqueue_body'  : grader_reply,}
     r = s.post(xqueue_url+'/xqueue/put_result/', data=returnpackage)
-    print r
-    print r.text
 
 def parse_xreply(xreply_str):
     try:

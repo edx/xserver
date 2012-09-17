@@ -36,7 +36,6 @@ def main():
 
     r = s.post(xqueue_url+'/xqueue/login/', data=django_auth)
     (error, msg) = parse_xreply(r.text)
-    print msg
     if error: # We'll assume no error code for the remainder of the demo
         return
 
