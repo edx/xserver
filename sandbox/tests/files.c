@@ -11,7 +11,7 @@ main(int argc, char **argv)
     {
         // open file for writing
         sprintf(filename, "testfile-%d", i);
-        FILE *file = fopen(argv[1], "w");
+        FILE *file = fopen(filename, "w");
 
         // write 1 B
         fprintf(file, "#");
