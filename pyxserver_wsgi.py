@@ -6,10 +6,17 @@
 
 import json
 from lxml import etree
-from time import localtime, strftime 
+from time import localtime, strftime
 
 import pyxserver
 import logging
+
+
+# Not django, but do something similar
+import settings
+logging.config.dictConfig(settings.LOGGING)
+
+log = logging.getLogger("xserver." + __name__)
 
 def _compose_single_test(test):
     '''
@@ -39,7 +46,7 @@ def _compose_single_test(test):
 
     test_msg += '</section>'
     test_msg += '</div>'
-    return test_msg 
+    return test_msg
 
 def compose_score_msg(tests):
     score_msg = '<div>'
@@ -57,14 +64,14 @@ def do_POST(data):
     # This server expects jobs to be pushed to it from the queue
     xpackage = json.loads(data)
     body  = xpackage['xqueue_body']
-    files = xpackage['xqueue_files'] 
+    files = xpackage['xqueue_files']
 
     # Delivery from the lms
-    body = json.loads(body) 
+    body = json.loads(body)
     grader_payload = body['grader_payload']
     student_response = body['student_response']
 
-    # Extract pyxserver-specific content from the grader_payload. Note that 
+    # Extract pyxserver-specific content from the grader_payload. Note that
     #   external graders are free to define their payload format.
     grader_payload = etree.fromstring(grader_payload)
     tests = grader_payload.find('tests').text.strip()
@@ -78,37 +85,48 @@ def do_POST(data):
     points = 1 if correct else 0
 
     # Make valid XML message
-    test = { 'title': '6.00x Pyxserver', 
+    test = { 'title': '6.00x Pyxserver',
              'shortform': award,
              'longform': message }
     tests = [test]
     score_msg = compose_score_msg(tests)
 
     reply = { 'correct': correct,
-              'score': points, 
+              'score': points,
               'msg': score_msg }
 
     return json.dumps(reply)
 
 # Entry point
 def application(env, start_response):
-    logging.basicConfig()
 
+    log.info("Starting application")
     # Handle request
     method = env['REQUEST_METHOD']
     data = env['wsgi.input'].read()
 
-    print '-' * 60
-    print method
+    log.debug('-' * 60)
+    log.debug(method)
+
+    def post_wrapper(data):
+        try:
+            return do_POST(data)
+        except:
+            log.exception("Error processing request")
+            return None
 
     handlers = {'GET': do_GET,
-                 'POST': do_POST,
+                 'POST': post_wrapper,
                  }
     if method in handlers.keys():
         reply = handlers[method](data)
-        print ' [*] reply:\n%s\n' % reply
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return reply
-    else:
-        start_response('404 Not Found', [('Content-Type', 'text/plain')])
-        return ''
+
+        if reply is not None:
+            log.debug(' [*] reply:\n%s\n' % reply)
+            
+            start_response('200 OK', [('Content-Type', 'text/html')])
+            return reply
+
+    # If we fell through to here, complain.
+    start_response('404 Not Found', [('Content-Type', 'text/plain')])
+    return ''

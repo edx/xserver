@@ -1,0 +1,63 @@
+<pyxserver>
+<tests>repeat:10,generate</tests>
+<processor>
+def input_check(code):
+   if code.count('isVowel') &lt;= 0: return "Your function must be titled ' isVowel ' !!"
+   docstring = False
+   lines = code.split('\n')
+   for line in lines:
+      if line.count('"""') &gt; 0 or line.count("'''") &gt; 0: docstring = not docstring
+      if docstring: continue
+      if line[:line.find('#')].count(' in ') &gt; 0: return 'Your code cannot make use of the "in" keyword.'
+
+   return False
+
+initial_display=""
+
+answer = """
+def isVowel(char):
+    '''
+    char: a single letter of any case
+
+    returns: True if char is a vowel and False otherwise.
+    '''
+    if char == 'a' or char == 'e' or char == 'i' or char == 'o' or char == 'u':
+        return True
+    elif char == 'A' or char == 'E' or char == 'I' or char == 'O' or char == 'U':
+        return True
+    else:
+        return False
+"""
+
+preamble = """
+import sys, time, random
+import string
+"""
+
+test_program = """
+def test():
+   # Problem specific (generate inputs and call problem fn)
+   vowels = [0, 4, 8, 14, 20, 26, 30, 34, 40, 46]
+   ind = random.choice(vowels)
+   # Make 1/2 the test cases be consonants
+   if random.random() &gt; 0.5:      
+      while ind in vowels:
+         ind = random.randint(0, 51)
+   char = string.letters[ind]
+
+   print 'Test case is: isVowel("' + char + '")'
+   print # blank line
+   return str(isVowel(char))
+
+def main():
+   # Seed to make randomness the same
+   rndlist = map(int,os.getenv('rndlist').split(','))
+   random.seed(rndlist[0])
+
+   # Call test fn
+   LOG_OUTPUT.write( test() )
+
+main()
+"""
+</processor>
+</pyxserver>
