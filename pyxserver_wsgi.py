@@ -71,7 +71,7 @@ def do_POST(data):
 
     # Delivery from the lms
     body = json.loads(body)
-    relative_grader_path = body['grader_payload']
+    relative_grader_path = body['grader_payload'].strip()
     student_response = body['student_response']
 
     grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
