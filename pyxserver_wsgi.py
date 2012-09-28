@@ -74,9 +74,12 @@ def do_POST(data):
 
     # Delivery from the lms
     body = json.loads(body)
-    relative_grader_path = body['grader_payload'].strip()
     student_response = body['student_response']
+    # If parsing json fails, erroring is fine--something is wrong in the content.
+    payload = body['grader_payload']
+    grader_config = json.loads(payload)
 
+    relative_grader_path = grader_config['grader']
     grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
     results = grade.grade(grader_path, student_response, sb50.run)
 

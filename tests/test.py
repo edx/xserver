@@ -52,11 +52,11 @@ def check_not_contains(string, substr):
 
 def check(dirname):
     """
-    Look for payload.xml, correct*.py, wrong*.py, run tests.
+    Look for payload.json, correct*.py, wrong*.py, run tests.
     """
-    payload_file = os.path.join(dirname, 'payload.xml')
+    payload_file = os.path.join(dirname, 'payload.json')
     if not os.path.isfile(payload_file):
-        print "no payload.xml in {0}".format(dirname)
+        print "no payload.json in {0}".format(dirname)
         return
 
     with open(payload_file) as f:
