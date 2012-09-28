@@ -5,15 +5,18 @@
 #------------------------------------------------------------
 
 import json
-from lxml import etree
+import logging
+import os
+import os.path
+import sys
 from time import localtime, strftime
 
-import pyxserver
-import logging
+import settings    # Not django, but do something similar
 
+# make sure we can find the grader files
+sys.path.append(settings.GRADER_ROOT)
+import grade
 
-# Not django, but do something similar
-import settings
 logging.config.dictConfig(settings.LOGGING)
 
 log = logging.getLogger("xserver." + __name__)
@@ -68,32 +71,21 @@ def do_POST(data):
 
     # Delivery from the lms
     body = json.loads(body)
-    grader_payload = body['grader_payload']
+    relative_grader_path = body['grader_payload']
     student_response = body['student_response']
 
-    # Extract pyxserver-specific content from the grader_payload. Note that
-    #   external graders are free to define their payload format.
-    grader_payload = etree.fromstring(grader_payload)
-    tests = grader_payload.find('tests').text.strip()
-    processor = grader_payload.find('processor').text
+    grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
+    results = grade.grade(grader_path, student_response)
 
-    award, message = pyxserver.run_code_sandbox(processor, student_response, tests)
-
-    # "External grader" reply format
-    message = '<span>' + message + '</span>'
-    correct = award == 'EXACT_ANS'
-    points = 1 if correct else 0
 
     # Make valid XML message
-    test = { 'title': '6.00x Pyxserver',
-             'shortform': award,
-             'longform': message }
-    tests = [test]
-    score_msg = compose_score_msg(tests)
+    # test = { 'title': '6.00x Grader',
+    #          'shortform': award,
+    #          'longform': message }
 
-    reply = { 'correct': correct,
-              'score': points,
-              'msg': score_msg }
+    reply = { 'correct': results['correct'],
+              'score': results['score'],
+              'msg': '<pre>' + json.dumps(results) + '</pre>' }
 
     return json.dumps(reply)
 
@@ -123,7 +115,7 @@ def application(env, start_response):
 
         if reply is not None:
             log.debug(' [*] reply:\n%s\n' % reply)
-            
+
             start_response('200 OK', [('Content-Type', 'text/html')])
             return reply
 

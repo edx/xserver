@@ -4,6 +4,7 @@ import json
 import os
 from logsettings import get_logger_config
 from path import path
+import sys
 
 ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH
@@ -17,12 +18,15 @@ DEBUG = False
 RUN_URL = 'http://172.16.27.128:8080/'  # Victor's VM ...
 RUN_URL = 'http://sandbox-runserver-001.m.edx.org:8080/'
 
+
+
 LOGGING = get_logger_config(ENV_ROOT / "log",
                             logging_env="dev",
                             local_loglevel="DEBUG",
                             dev_env=True,
                             debug=True)
 
+GRADER_ROOT = os.path.abspath(os.path.join(ENV_ROOT, 'data/6.00x/graders'))
 
 # AWS
 
