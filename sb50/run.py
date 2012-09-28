@@ -12,6 +12,8 @@ import settings
 
 run_url = None
 
+log = logging.getLogger(__name__)
+
 def upload(paths):
     """
     Given a list of paths, upload them to the sandbox, and return an id that
@@ -28,9 +30,12 @@ def upload_files(files):
         log.error("Request error: {0}".format(r.text))
         return None
 
-    #log.debug("Response: " +  r.json)
+    if r.json is None:
+        log.error("sandbox50 /upload failed to return valid json.  Response:" +  r.text)
+        return None
 
     id = r.json.get('id')
+    log.debug('Upload_files response: ' + r.text)
     return id
 
 def run(id, cmd):
@@ -39,15 +44,23 @@ def run(id, cmd):
     headers = {'content-type': 'application/json'}
     run_args = {'cmd': cmd,
                 'sandbox': { 'homedir': id }}
+
     endpoint = settings.RUN_URL + 'run'
     r = requests.post(endpoint, headers=headers, data=json.dumps(run_args))
+
+    if r.json is None:
+        log.error("sandbox50 /run failed to return valid json.  Response:" +  r.text)
+        return None
+
     return r.json
 
 
 def sb50_run_code(code):
-    """Upload passed in code file to the code exec sandbox as code.py, run it.
+    """
+    Upload passed in code file to the code exec sandbox as code.py, run it.
 
-    Return tuple (stdout, stderr), which may be None"""
+    Return tuple (stdout, stderr), either of which may be None
+    """
 
     #print "Running code: \n{0}".format(code)
 

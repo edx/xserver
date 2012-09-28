@@ -13,6 +13,9 @@ from time import localtime, strftime
 
 import settings    # Not django, but do something similar
 
+import sb50.run
+
+
 # make sure we can find the grader files
 sys.path.append(settings.GRADER_ROOT)
 import grade
@@ -75,7 +78,7 @@ def do_POST(data):
     student_response = body['student_response']
 
     grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
-    results = grade.grade(grader_path, student_response)
+    results = grade.grade(grader_path, student_response, sb50.run)
 
 
     # Make valid XML message
