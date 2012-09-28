@@ -1,5 +1,6 @@
 # Not django (for now), but use the same settings format anyway
 
+import json
 import os
 from logsettings import get_logger_config
 from path import path
@@ -40,4 +41,3 @@ if os.path.isfile(ENV_ROOT / "env.json"):
                                 debug=False)
 
 
-print "LOGGING is ", LOGGING
