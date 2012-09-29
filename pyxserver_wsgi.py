@@ -79,6 +79,7 @@ def do_POST(data):
     payload = body['grader_payload']
     grader_config = json.loads(payload)
 
+    log.debug("Processing submission, grader payload: {0}".format(payload))
     relative_grader_path = grader_config['grader']
     grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
     results = grade.grade(grader_path, student_response, sb50.run)
