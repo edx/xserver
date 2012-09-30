@@ -17,7 +17,7 @@ DEBUG = False
 # Must end in '/'
 RUN_URL = 'http://172.16.27.128:8080/'  # Victor's VM ...
 RUN_URL = 'http://sandbox-runserver-001.m.edx.org:8080/'
-
+RUN_URL = 'http://sandbox-runserver.elb.edx.org:80/'
 
 
 LOGGING = get_logger_config(ENV_ROOT / "log",

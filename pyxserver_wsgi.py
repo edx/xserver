@@ -75,9 +75,14 @@ def do_POST(data):
     # Delivery from the lms
     body = json.loads(body)
     student_response = body['student_response']
-    # If parsing json fails, erroring is fine--something is wrong in the content.
     payload = body['grader_payload']
-    grader_config = json.loads(payload)
+    try:
+        grader_config = json.loads(payload)
+    except ValueError as err:
+        # If parsing json fails, erroring is fine--something is wrong in the content.
+        # However, for debugging, still want to see what the problem is
+        log.debug("error parsing: '{0}' -- {1}".format(payload, err))
+        raise
 
     log.debug("Processing submission, grader payload: {0}".format(payload))
     relative_grader_path = grader_config['grader']
@@ -111,7 +116,7 @@ def application(env, start_response):
         try:
             return do_POST(data)
         except:
-            log.exception("Error processing request")
+            log.exception("Error processing request: {0}".format(data))
             return None
 
     handlers = {'GET': do_GET,

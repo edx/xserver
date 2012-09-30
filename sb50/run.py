@@ -54,6 +54,16 @@ def run(id, cmd):
 
     return r.json
 
+def record_suspicious_submission(msg, code_str):
+    """
+    Record a suspicious submission:
+
+    TODO: upload to edx-studentcode-suspicious bucket on S3.  For now, just
+    logging to avoids need for more config changes (S3 credentials, python
+    requirements).
+    """
+    log.warning('Suspicious code: {0}, {1}'.format(msg, code_str))
+    
 
 def sb50_run_code(code):
     """
