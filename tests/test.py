@@ -75,9 +75,14 @@ def check(dirname):
         check_not_contains(send(payload, answer), 'EXACT_ANS')
 
 def main(args):
-    if len(args) > 0:
-        print "Usage: test.py"
+    global xserver
+    if len(args) != 1:
+        print "Usage: test.py http://some-x-server:port/"
         sys.exit(1)
+
+    xserver = args[0]
+    if not xserver.endswith('/'):
+        xserver += '/'
 
     root = '.'
     for name in os.listdir(root):
