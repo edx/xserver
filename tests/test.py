@@ -49,6 +49,11 @@ def check_not_contains(string, substr):
     if substr in string:
         print "ERROR: Expected '{0}' not to be in '{1}'".format(substr, string)
 
+def check_right(string):
+    check_contains(string, '\"correct\": true')
+
+def check_wrong(string):
+    check_contains(string, '\"correct\": false')
 
 def check(dirname):
     """
@@ -66,13 +71,13 @@ def check(dirname):
         print "Checking correct response from {0}".format(name)
         with open(name) as f:
             answer = f.read()
-        check_contains(send(payload, answer), 'EXACT_ANS')
+        check_right(send(payload, answer))
 
     for name in glob.glob(os.path.join(dirname, 'wrong*.py')):
         print "Checking wrong response from {0}".format(name)
         with open(name) as f:
             answer = f.read()
-        check_not_contains(send(payload, answer), 'EXACT_ANS')
+        check_wrong(send(payload, answer))
 
 def main(args):
     global xserver

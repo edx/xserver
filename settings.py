@@ -44,4 +44,8 @@ if os.path.isfile(ENV_ROOT / "env.json"):
                                 local_loglevel=local_loglevel,
                                 debug=False)
 
-
+    # Should be absolute path to 6.00 grader dir.
+    # NOTE: This means we only get one version of 6.00 graders available--has to
+    # be the same for internal and external class.  Not critical -- can always
+    # use different grader file if want different problems.
+    GRADER_ROOT = ENV_TOKENS.get('GRADER_ROOT')
