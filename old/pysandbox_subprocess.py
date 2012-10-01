@@ -13,6 +13,8 @@ import re
 import resource
 import os
 import pyxserver_config
+import time
+from sb50.run import sb50_run_code
 
 def mangle_code(code,argv):
 
@@ -31,14 +33,14 @@ def mangle_code(code,argv):
 
     # clean up CR's
     code = code.replace('\r','')
-    
+
 
     # check for malicious statements
     x = code.replace(' ','')
     x = re.sub("os\.fdopen\(3,'w'\)",'LOG_OUTPUT',x)	# fdopen(3.. is ok
 
     if (x.count('/etc/passwd')
-        or x.count('importsystem') 
+        or x.count('importsystem')
         or x.count('sys.path') or x.count('tutor.tutor') or x.count('importtutor')
         or x.count('__builtin')):
 
@@ -49,7 +51,7 @@ def mangle_code(code,argv):
     head = "import sys\noldpath = sys.path\nsys.path = ['/usr/lib/python2.7', '/usr/lib/python2.7/dist-packages', '/usr/lib/python2.7/lib-dynload/','%s']\n\n" % pyxserver_config.PYXSERVER_LIB_PATH
     head += "from cStringIO import StringIO\nLOG_OUTPUT = StringIO()\n\n"
     head += "ENV = %s\n\n" % repr(argv)
-    
+
     footer = "\n\nprint \"!LOGOUTPUT\"\n"
     footer += "print LOG_OUTPUT.getvalue()\n"
     code = head + code + footer
@@ -62,6 +64,7 @@ def setlimits():
     """
     resource.setrlimit(resource.RLIMIT_CPU, (2, 2))
 
+
 def sandbox_run_code(code,argv):
     """
     Run code, returning stdout, stderr, and output_log.
@@ -70,12 +73,12 @@ def sandbox_run_code(code,argv):
     passing argument valies, ie argv1, argv2, ... to the code being run
 
     """
-    
+
     (code, code_ok) = mangle_code(code,argv)
 
     if not code_ok:
         return('','BAD CODE - this will be logged','')
-    
+
     # mangle code to change os.getenv(foo) to ENV[foo]
     code = re.sub('os\.environ','ENV',code)
     code = re.sub('os\.getenv\(([a-z0-9\'\"]+)\)','ENV[\\1]',code)
@@ -88,24 +91,34 @@ def sandbox_run_code(code,argv):
     code = code.replace('f.close()','')
 
     code = code.replace('\r','')
-    
-    
-    python = subprocess.Popen(["python"],stdin = subprocess.PIPE,\
-                                         stdout = subprocess.PIPE,\
-                                         stderr = subprocess.PIPE,\
-                                         preexec_fn = setlimits)
-    output = python.communicate(code)
-    
-    out,err = output
-    
+
+
+    start = time.time()
+    out, err = sb50_run_code(code)
+    end = time.time()
+    print "call to run50 took %.03f sec" % (end - start)
+    # Code below doesn't like None.  "Fix".
+    if out is None:
+        out = ''
+    if err is None:
+        err = ''
+
+    # python = subprocess.Popen(["python"],stdin = subprocess.PIPE,\
+    #                                      stdout = subprocess.PIPE,\
+    #                                      stderr = subprocess.PIPE,\
+    #                                      preexec_fn = setlimits)
+    # output = python.communicate(code)
+
+    # out,err = output
+
     n = out.split("!LOGOUTPUT")
-    
+
     if len(n) == 2: #should be this
         out,log = n
     elif len(n) == 1: #code didn't run to completion
         if err.strip() == "":
             err = "Your code did not run to completion, but no error message was returned."
-            err += "\nThis normally means that your code contains an infinite loop or otherwise took too long to run."            
+            err += "\nThis normally means that your code contains an infinite loop or otherwise took too long to run."
         log = ''
     else: #someone is trying to game the system
         out = ''
@@ -113,5 +126,5 @@ def sandbox_run_code(code,argv):
         err = "BAD CODE - this will be logged"
     if len(out) >= 10000:
        out = out[:10000]+"\n\n...OUTPUT TRUNCATED..."
-    
+
     return out,err,log
