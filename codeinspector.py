@@ -10,16 +10,19 @@ class Code_Inspector(Bdb):
         self.student_source = student_source
         self.variable_trackers = []
         self.exec_env={}
-        
+
     def __enter__(self):
-        """ called in the beginning of the execution of a 'with' statment"""
+        """ called in the beginning of the execution of a 'with' statment
+        (debugger wants student code in a file.  So put it in a file.)
+
+        """
         code_file_name = tempfile.mkstemp(suffix=".py")[1]
         self.code_file = open(code_file_name, 'w+')
         self.code_file.write(self.student_source)
         self.code_file.seek(0)
         sys.path.append(os.path.abspath(os.path.join(self.code_file.name, os.path.pardir)))
         return self
-        
+
     def __exit__(self, type, value, traceback):
         """ called at the end of the execution of a 'with' statment"""
         self.code_file.close()
@@ -46,8 +49,8 @@ class Code_Inspector(Bdb):
     def inspect_variable(self, variable, inspect_variable_changes):
         """
         takes a variable of interest as a String and a function that takes a list of values. That function
-        should return True or False depending on whether that variable's changes are appropriate. 
-        This method will then register that function 
+        should return True or False depending on whether that variable's changes are appropriate.
+        This method will then register that function
         so that it will eventually recieve the appropriate input.
         """
         self.code_file.seek(0)
@@ -57,11 +60,11 @@ class Code_Inspector(Bdb):
         for line in self.code_file:
             lineno +=1
             if variable in line:
-                self.inspect_line(lineno, tracker.recieve_variable_call) 
+                self.inspect_line(lineno, tracker.recieve_variable_call)
 
     def set_break(self, filename, lineno, temporary=0, cond = None,
                   funcname=None):
-        """sets a breakpoint at the appropriate line. It is largely copy-pasted from the bdb implementation, 
+        """sets a breakpoint at the appropriate line. It is largely copy-pasted from the bdb implementation,
         but returns a reference to the breakpoint it just made rather than dropping it """
         filename = self.canonic(filename)
         import linecache # Import as late as possible
@@ -78,8 +81,8 @@ class Code_Inspector(Bdb):
 
     def inspect_dispatch(self, function_call=None):
         """
-        dispatches all of the inspection functions that have been set up and returns 
-        the results of each of those inspections. 
+        dispatches all of the inspection functions that have been set up and returns
+        the results of each of those inspections.
         """
         if function_call:
             student_code = __import__(os.path.basename(self.code_file.name[:-3]))
@@ -96,13 +99,14 @@ class VariableTracker:
     Used to track a single variable which might be present on many different lines
     """
     def __init__(self, variable, analyzer):
-        """ takes a string representing a variable of interest and a function which 
+        """ takes a string representing a variable of interest and a function which
         takes a list of values
         """
-
         self.matrix = {}
         self.analyzer = analyzer
         self.var = variable
+
+
     def recieve_variable_call(self, frame):
         """
         used to track a particular line on which a variable is found
@@ -112,12 +116,14 @@ class VariableTracker:
                 self.matrix[frame.f_lineno] = []
             self.matrix[frame.f_lineno].append(frame.f_locals[self.var])
 
+
     def determine_value(self):
         """
         a determines a final result when a variable appears on many lines
         """
         if not self.matrix.values(): return [False]
-        return max([self.analyzer(values) for values in self.matrix.values()])     
+        return max([self.analyzer(values) for values in self.matrix.values()])
+
 
 if __name__ == "__main__":
     mock_code = """
@@ -140,6 +146,14 @@ def calc_payments(balance, interest):
 """
 
     def inspect_function(values):
+        """
+        values: list of values that the inspected variable has taken during the
+        execution of the student code, at this particular line/reference.
+        Called once per line (mention) after student code runs.
+        """
+        # implementation: value should change at least 3 times, and each
+        # subsequent change should be ~half as large as the previous one
+
         diff = -1 #all new assignments will keep diff positive
         if (len(values)<3):
             return False
@@ -166,8 +180,8 @@ def calc_payments(balance, interest):
             calced_balance -= payment
             calced_balance *= 1+monthly_interest
     return payment
-        
-""" 
+
+"""
     with Code_Inspector(mock_code) as my_ci:
         my_ci.inspect_variable("payment", inspect_function)
         print my_ci.inspect_dispatch("calc_payments(3500, .01)")
