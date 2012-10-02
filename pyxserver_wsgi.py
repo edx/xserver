@@ -4,6 +4,7 @@
 #        gunicorn -w 4 -b 127.0.0.1:3031 pyxserver_wsgi:application
 #------------------------------------------------------------
 
+import cgi    # for the escape() function
 import json
 import logging
 import os
@@ -61,6 +62,73 @@ def compose_score_msg(tests):
     score_msg += '</div>'
     return score_msg
 
+results_template = """
+<div class="test">
+<header>Test results</header>
+  <section>
+  <div class="shortform">
+  {status}
+  </div>
+  <div class="longform">
+  {results}
+  </div>
+  </section>
+</div>
+"""
+
+results_ok_template = """
+  <header class="correct">{short-description}</header>
+  {long-description}
+  <div class="result-output">
+      <dl>
+      <dt>Output:</dt>
+      <dd>{actual-output}</dd>
+      </dl>
+  </div>
+"""
+
+
+results_error_template = """
+  <header class="incorrect">{short-description}</header>
+  {long-description}
+  <div class="result-output">
+    <dl>
+    <dt>Your output:</dt>
+    <dd>{actual-output}</dd>
+    <dt>Our output:</dt>
+    <dd>{expected-output}</dd>
+    </dl>
+  </div>
+"""
+
+def to_dict(result):
+    # long description may or may not be provided.  If not, don't display it.
+    # TODO: replace with mako template
+    esc = cgi.escape
+    if result[1]:
+        long_desc = '<p>{0}</p>'.format(esc(result[1]))
+    else:
+        long_desc = ''
+    return {'short-description': esc(result[0]),
+            'long-description': long_desc,
+            'correct': result[2],   # Boolean; don't escape.
+            'expected-output': esc(result[3]),
+            'actual-output': esc(result[4])
+            }
+
+def render_results(results):
+    output = []
+    test_results = [to_dict(r) for r in results['tests']]
+    for result in test_results:
+        if result['correct']:
+            template = results_ok_template
+        else:
+            template = results_error_template
+        output += template.format(**result)
+
+    status = 'CORRECT' if results['correct'] else 'INCORRECT'
+    return results_template.format(status=status, results=''.join(output))
+
 
 def do_GET(data):
     return "Hey, the time is %s" % strftime("%a, %d %b %Y %H:%M:%S", localtime())
@@ -97,7 +165,7 @@ def do_POST(data):
 
     reply = { 'correct': results['correct'],
               'score': results['score'],
-              'msg': '<pre>' + json.dumps(results) + '</pre>' }
+              'msg': render_results(results) }
 
     return json.dumps(reply)
 
