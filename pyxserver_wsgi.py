@@ -66,35 +66,35 @@ results_template = """
 <div class="test">
 <header>Test results</header>
   <section>
-  <div class="shortform">
-  {status}
-  </div>
-  <div class="longform">
-  {results}
-  </div>
+    <div class="shortform">
+    {status}
+    </div>
+    <div class="longform">
+    {results}
+    </div>
   </section>
 </div>
 """
 
 results_ok_template = """
-  <header class="correct">{short-description}</header>
-  {long-description}
-  <div class="result-output">
-      <dl>
-      <dt>Output:</dt>
-      <dd>{actual-output}</dd>
-      </dl>
+  <div class="result-output result-correct">
+    <h4>{short-description}</h4>
+    <p>{long-description}</p>
+    <dl>
+    <dt>Output:</dt>
+    <dd>{actual-output}</dd>
+    </dl>
   </div>
 """
 
 
 results_error_template = """
-  <header class="incorrect">{short-description}</header>
-  {long-description}
-  <div class="result-output">
+  <div class="result-output result-incorrect">
+    <h4>{short-description}</h4>
+    <p>{long-description}</p>
     <dl>
     <dt>Your output:</dt>
-    <dd>{actual-output}</dd>
+    <dd class="result-error">{actual-output}</dd>
     <dt>Our output:</dt>
     <dd>{expected-output}</dd>
     </dl>
