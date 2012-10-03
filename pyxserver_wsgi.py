@@ -68,6 +68,14 @@ results_incorrect_template = """
   </div>
 """
 
+def format_errors(errors):
+    esc = cgi.escape
+    error_list = [esc(e) for e in errors or []]
+    if error_list:
+        items = ['<li>{0}</li>\n'.format(e) for e in error_list].join('\n')
+        errors = '<ul>\n{0}<\ul>\n'.format(items)
+    return error_list
+
 def to_dict(result):
     # long description may or may not be provided.  If not, don't display it.
     # TODO: replace with mako template
@@ -93,7 +101,7 @@ def render_results(results):
             template = results_incorrect_template
         output += template.format(**result)
 
-    errors = results.get('errors',[]).join('\n<br/>\n')
+    errors = format_errors(results['errors'])
 
     status = 'INCORRECT'
     if errors:
