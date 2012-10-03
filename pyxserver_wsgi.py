@@ -25,42 +25,6 @@ logging.config.dictConfig(settings.LOGGING)
 
 log = logging.getLogger("xserver." + __name__)
 
-def _compose_single_test(test):
-    '''
-    Generate the return payload for a single external grader test.
-
-    Param 'test' is a dict with keys:
-        'title':
-        'shortform': Short (~1 sentence) summary of test
-        'longform':  Long output that is initially collapsed
-    '''
-    test_msg = '<div class="test">'
-    if 'title' in test:
-        test_msg += '<header><h3>'
-        test_msg += test['title']
-        test_msg += '</h3></header>'
-
-    test_msg += '<section>'
-    if 'shortform' in test:
-        test_msg += '<div class="shortform">'
-        test_msg += test['shortform']
-        test_msg += '</div>'
-
-    if 'longform' in test:
-        test_msg += '<div class="longform">'
-        test_msg += test['longform']
-        test_msg += '</div>'
-
-    test_msg += '</section>'
-    test_msg += '</div>'
-    return test_msg
-
-def compose_score_msg(tests):
-    score_msg = '<div>'
-    for test in tests:
-        score_msg += _compose_single_test(test)
-    score_msg += '</div>'
-    return score_msg
 
 results_template = """
 <div class="test">
@@ -70,36 +34,47 @@ results_template = """
     {status}
     </div>
     <div class="longform">
-    {results}
+      {errors}
+      {results}
     </div>
   </section>
 </div>
 """
 
-results_ok_template = """
+results_correct_template = """
   <div class="result-output result-correct">
     <h4>{short-description}</h4>
     <p>{long-description}</p>
     <dl>
     <dt>Output:</dt>
-    <dd>{actual-output}</dd>
+    <dd class="result-output">{actual-output}</dd>
     </dl>
   </div>
 """
 
 
-results_error_template = """
+results_incorrect_template = """
   <div class="result-output result-incorrect">
     <h4>{short-description}</h4>
     <p>{long-description}</p>
     <dl>
     <dt>Your output:</dt>
-    <dd class="result-error">{actual-output}</dd>
+    <dd class="result-output">{actual-output}</dd>
     <dt>Our output:</dt>
     <dd>{expected-output}</dd>
     </dl>
   </div>
 """
+
+def format_errors(errors):
+    esc = cgi.escape
+    error_string = ''
+    error_list = [esc(e) for e in errors or []]
+    if error_list:
+        items = '\n'.join(['<li>{0}</li>\n'.format(e) for e in error_list])
+        error_string = '<ul>\n{0}</ul>\n'.format(items)
+        error_string = '<div class="result-errors">{0}</div>'.format(error_string)
+    return error_string
 
 def to_dict(result):
     # long description may or may not be provided.  If not, don't display it.
@@ -121,14 +96,22 @@ def render_results(results):
     test_results = [to_dict(r) for r in results['tests']]
     for result in test_results:
         if result['correct']:
-            template = results_ok_template
+            template = results_correct_template
         else:
-            template = results_error_template
+            template = results_incorrect_template
         output += template.format(**result)
 
-    status = 'CORRECT' if results['correct'] else 'INCORRECT'
-    return results_template.format(status=status, results=''.join(output))
+    errors = format_errors(results['errors'])
 
+    status = 'INCORRECT'
+    if errors:
+        status = 'ERROR'
+    elif results['correct']:
+        status = 'CORRECT'
+
+    return results_template.format(status=status,
+                                   errors=errors,
+                                   results=''.join(output))
 
 def do_GET(data):
     return "Hey, the time is %s" % strftime("%a, %d %b %Y %H:%M:%S", localtime())
