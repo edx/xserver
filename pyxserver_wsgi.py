@@ -70,7 +70,10 @@ results_template = """
     {status}
     </div>
     <div class="longform">
-    {results}
+      <div class="result-errors">
+        {errors}
+      </div>
+      {results}
     </div>
   </section>
 </div>
@@ -82,7 +85,7 @@ results_ok_template = """
     <p>{long-description}</p>
     <dl>
     <dt>Output:</dt>
-    <dd>{actual-output}</dd>
+    <dd class="result-output">{actual-output}</dd>
     </dl>
   </div>
 """
@@ -94,7 +97,7 @@ results_error_template = """
     <p>{long-description}</p>
     <dl>
     <dt>Your output:</dt>
-    <dd class="result-error">{actual-output}</dd>
+    <dd class="result-output">{actual-output}</dd>
     <dt>Our output:</dt>
     <dd>{expected-output}</dd>
     </dl>
@@ -126,9 +129,17 @@ def render_results(results):
             template = results_error_template
         output += template.format(**result)
 
-    status = 'CORRECT' if results['correct'] else 'INCORRECT'
-    return results_template.format(status=status, results=''.join(output))
+    errors = results.get('errors','')
 
+    status = 'INCORRECT'
+    if errors:
+        status = 'ERROR'
+    elif results['correct']:
+        statuc = 'CORRECT'
+
+    return results_template.format(status=status,
+                                   errors=errors,
+                                   results=''.join(output))
 
 def do_GET(data):
     return "Hey, the time is %s" % strftime("%a, %d %b %Y %H:%M:%S", localtime())
