@@ -34,9 +34,7 @@ results_template = """
     {status}
     </div>
     <div class="longform">
-      <div class="result-errors">
-        {errors}
-      </div>
+      {errors}
       {results}
     </div>
   </section>
@@ -70,11 +68,13 @@ results_incorrect_template = """
 
 def format_errors(errors):
     esc = cgi.escape
+    error_string = ''
     error_list = [esc(e) for e in errors or []]
     if error_list:
-        items = ['<li>{0}</li>\n'.format(e) for e in error_list].join('\n')
-        errors = '<ul>\n{0}<\ul>\n'.format(items)
-    return error_list
+        items = '\n'.join(['<li>{0}</li>\n'.format(e) for e in error_list])
+        error_string = '<ul>\n{0}</ul>\n'.format(items)
+        error_string = '<div class="result-errors">{0}</div>'.format(error_string)
+    return error_string
 
 def to_dict(result):
     # long description may or may not be provided.  If not, don't display it.
