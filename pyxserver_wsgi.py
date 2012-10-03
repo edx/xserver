@@ -25,42 +25,6 @@ logging.config.dictConfig(settings.LOGGING)
 
 log = logging.getLogger("xserver." + __name__)
 
-def _compose_single_test(test):
-    '''
-    Generate the return payload for a single external grader test.
-
-    Param 'test' is a dict with keys:
-        'title':
-        'shortform': Short (~1 sentence) summary of test
-        'longform':  Long output that is initially collapsed
-    '''
-    test_msg = '<div class="test">'
-    if 'title' in test:
-        test_msg += '<header><h3>'
-        test_msg += test['title']
-        test_msg += '</h3></header>'
-
-    test_msg += '<section>'
-    if 'shortform' in test:
-        test_msg += '<div class="shortform">'
-        test_msg += test['shortform']
-        test_msg += '</div>'
-
-    if 'longform' in test:
-        test_msg += '<div class="longform">'
-        test_msg += test['longform']
-        test_msg += '</div>'
-
-    test_msg += '</section>'
-    test_msg += '</div>'
-    return test_msg
-
-def compose_score_msg(tests):
-    score_msg = '<div>'
-    for test in tests:
-        score_msg += _compose_single_test(test)
-    score_msg += '</div>'
-    return score_msg
 
 results_template = """
 <div class="test">
@@ -79,7 +43,7 @@ results_template = """
 </div>
 """
 
-results_ok_template = """
+results_correct_template = """
   <div class="result-output result-correct">
     <h4>{short-description}</h4>
     <p>{long-description}</p>
@@ -91,7 +55,7 @@ results_ok_template = """
 """
 
 
-results_error_template = """
+results_incorrect_template = """
   <div class="result-output result-incorrect">
     <h4>{short-description}</h4>
     <p>{long-description}</p>
@@ -124,18 +88,18 @@ def render_results(results):
     test_results = [to_dict(r) for r in results['tests']]
     for result in test_results:
         if result['correct']:
-            template = results_ok_template
+            template = results_correct_template
         else:
-            template = results_error_template
+            template = results_incorrect_template
         output += template.format(**result)
 
-    errors = results.get('errors','')
+    errors = results.get('errors',[]).join('\n<br/>\n')
 
     status = 'INCORRECT'
     if errors:
         status = 'ERROR'
     elif results['correct']:
-        statuc = 'CORRECT'
+        status = 'CORRECT'
 
     return results_template.format(status=status,
                                    errors=errors,
