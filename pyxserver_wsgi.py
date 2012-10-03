@@ -41,13 +41,14 @@ results_template = """
 </div>
 """
 
+
 results_correct_template = """
   <div class="result-output result-correct">
     <h4>{short-description}</h4>
     <p>{long-description}</p>
     <dl>
     <dt>Output:</dt>
-    <dd class="result-actual-ouput">{actual-output}</dd>
+    <dd class="result-actual-output">{actual-output}</dd>
     </dl>
   </div>
 """
@@ -60,11 +61,12 @@ results_incorrect_template = """
     <dl>
     <dt>Your output:</dt>
     <dd class="result-actual-output">{actual-output}</dd>
-    <dt>Our output:</dt>
+    <dt>Correct output:</dt>
     <dd>{expected-output}</dd>
     </dl>
   </div>
 """
+
 
 def format_errors(errors):
     esc = cgi.escape
@@ -75,6 +77,7 @@ def format_errors(errors):
         error_string = '<ul>\n{0}</ul>\n'.format(items)
         error_string = '<div class="result-errors">{0}</div>'.format(error_string)
     return error_string
+
 
 def to_dict(result):
     # long description may or may not be provided.  If not, don't display it.
@@ -90,6 +93,7 @@ def to_dict(result):
             'expected-output': esc(result[3]),
             'actual-output': esc(result[4])
             }
+
 
 def render_results(results):
     output = []
@@ -112,6 +116,7 @@ def render_results(results):
     return results_template.format(status=status,
                                    errors=errors,
                                    results=''.join(output))
+
 
 def do_GET(data):
     return "Hey, the time is %s" % strftime("%a, %d %b %Y %H:%M:%S", localtime())
@@ -151,6 +156,7 @@ def do_POST(data):
               'msg': render_results(results) }
 
     return json.dumps(reply)
+
 
 # Entry point
 def application(env, start_response):
