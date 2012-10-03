@@ -48,7 +48,9 @@ results_correct_template = """
     <p>{long-description}</p>
     <dl>
     <dt>Output:</dt>
-    <dd class="result-actual-output">{actual-output}</dd>
+    <dd class="result-actual-output">
+       <pre>{actual-output}</pre>
+       </dd>
     </dl>
   </div>
 """
@@ -60,9 +62,9 @@ results_incorrect_template = """
     <p>{long-description}</p>
     <dl>
     <dt>Your output:</dt>
-    <dd class="result-actual-output">{actual-output}</dd>
+    <dd class="result-actual-output"><pre>{actual-output}</pre></dd>
     <dt>Correct output:</dt>
-    <dd>{expected-output}</dd>
+    <dd><pre>{expected-output}</pre></dd>
     </dl>
   </div>
 """
@@ -73,7 +75,7 @@ def format_errors(errors):
     error_string = ''
     error_list = [esc(e) for e in errors or []]
     if error_list:
-        items = '\n'.join(['<li>{0}</li>\n'.format(e) for e in error_list])
+        items = '\n'.join(['<li><pre>{0}</pre></li>\n'.format(e) for e in error_list])
         error_string = '<ul>\n{0}</ul>\n'.format(items)
         error_string = '<div class="result-errors">{0}</div>'.format(error_string)
     return error_string
