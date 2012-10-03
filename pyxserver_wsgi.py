@@ -47,7 +47,7 @@ results_correct_template = """
     <p>{long-description}</p>
     <dl>
     <dt>Output:</dt>
-    <dd class="result-output">{actual-output}</dd>
+    <dd class="result-actual-ouput">{actual-output}</dd>
     </dl>
   </div>
 """
@@ -59,7 +59,7 @@ results_incorrect_template = """
     <p>{long-description}</p>
     <dl>
     <dt>Your output:</dt>
-    <dd class="result-output">{actual-output}</dd>
+    <dd class="result-actual-output">{actual-output}</dd>
     <dt>Our output:</dt>
     <dd>{expected-output}</dd>
     </dl>
