@@ -16,23 +16,26 @@ from path import path
 import requests
 import sys
 import time
+import random
 
-logging.basicConfig()
+logging.basicConfig(level=logging.DEBUG)
 
 log = logging.getLogger(__name__)
 
 runserver = 'http://127.0.0.1:3031/'
+
+unique = str(random.randint(100000, 999999))
 
 def upload(paths):
     """
     Given a list of paths, upload them to the sandbox, and return an id that
     identifies the created directory.
     """
-    files = dict( (os.path.basename(f), open(f)) for f in paths)
+    files = dict( (os.path.basename(f)+unique, open(f)) for f in paths)
     return upload_files(files)
 
 def upload_files(files):
-    endpoint = runserver + 'upload'
+    endpoint = upload_server + 'upload'
     r = requests.post(endpoint, files=files)
 
     if r.status_code != requests.codes.ok:
@@ -61,19 +64,26 @@ def run(id, cmd):
         log.error("sandbox50 /run failed to return valid json.  Response:" +  r.text)
         return None
 
+    log.debug('run response: ' + r.text)
     return r.json
 
 def main(args):
     global runserver
-    if len(args) < 3:
-        print "Usage: test-runserver.py http://some-x-server:port/ FILES cmd"
+    global upload_server
+    if len(args) < 4:
+        print "Usage: test-runserver.py http://x-server-to-upload-to:port/ http://x-server-to-run-on:port/ FILES cmd"
+        print "The first file in FILES will be randomized by appending a random string,"
+        print "and the name of that file in 'cmd' will be modified the same way."
         sys.exit(1)
 
-    runserver = args[0]
+    upload_server = args[0]
+    if not upload_server.endswith('/'):
+        upload_server += '/'
+    runserver = args[1]
     if not runserver.endswith('/'):
         runserver += '/'
 
-    files = args[1:-1]
+    files = args[2:-1]
     cmd = args[-1]
 
     start = time.time()
@@ -81,6 +91,7 @@ def main(args):
     print "Upload took %.03f sec" % (time.time() - start)
     
     start = time.time()
+    cmd = cmd.replace(files[0], files[0]+unique)
     r = run(id, cmd)
     print "run took %.03f sec" % (time.time() - start)
     if r is None:
