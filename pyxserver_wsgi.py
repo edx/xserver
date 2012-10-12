@@ -148,11 +148,7 @@ def do_POST(data):
     results = grade.grade(grader_path, student_response, sb50.run)
 
 
-    # Make valid XML message
-    # test = { 'title': '6.00x Grader',
-    #          'shortform': award,
-    #          'longform': message }
-
+    # Make valid JSON message
     reply = { 'correct': results['correct'],
               'score': results['score'],
               'msg': render_results(results) }
