@@ -3,7 +3,7 @@
 Send some test programs to an xserver.
 
 For each dir in the current directory, send the contents of payload.xml and each
-of the correct*.py and wrong*.py files.
+of the answer*.py, right*.py and wrong*.py files.
 """
 
 import argparse
@@ -55,46 +55,64 @@ def check_right(string):
 def check_wrong(string):
     check_contains(string, '\"correct\": false')
 
+def globs(dirname, *patterns):
+    """
+    Produce a sequence of all the files matching any of our patterns in dirname.
+    """
+    for pat in patterns:
+        for fname in glob.glob(os.path.join(dirname, pat)):
+            yield fname
+
+def contents(fname):
+    """
+    Return the contents of the file `fname`.
+    """
+    with open(fname) as f:
+        return f.read()
+
 def check(dirname):
     """
-    Look for payload.json, correct*.py, wrong*.py, run tests.
+    Look for payload.json, answer*.py, right*.py, wrong*.py, run tests.
     """
     payload_file = os.path.join(dirname, 'payload.json')
-    if not os.path.isfile(payload_file):
-        print "no payload.json in {0}".format(dirname)
-        return
+    if os.path.isfile(payload_file):
+        payload = contents(payload_file)
+    else:
+        graders = list(globs(dirname, 'grade*.py'))
+        if not graders:
+            #print "No payload.json or grade*.py in {0}".format(dirname)
+            return
+        if len(graders) > 1:
+            print "More than one grader in {0}".format(dirname)
+            return
+        payload = json.dumps({'grader': os.path.abspath(graders[0])})
 
-    with open(payload_file) as f:
-        payload = f.read()
-
-    for name in glob.glob(os.path.join(dirname, 'correct*.py')):
+    for name in globs(dirname, 'answer*.py', 'right*.py'):
         print "Checking correct response from {0}".format(name)
-        with open(name) as f:
-            answer = f.read()
+        answer = contents(name)
         check_right(send(payload, answer))
 
-    for name in glob.glob(os.path.join(dirname, 'wrong*.py')):
+    for name in globs(dirname, 'wrong*.py'):
         print "Checking wrong response from {0}".format(name)
-        with open(name) as f:
-            answer = f.read()
+        answer = contents(name)
         check_wrong(send(payload, answer))
 
-def main(args):
+def main(argv):
     global xserver
-    if len(args) != 1:
-        print "Usage: test.py http://some-x-server:port/"
-        sys.exit(1)
 
-    xserver = args[0]
+    parser = argparse.ArgumentParser(description="Send dummy requests to a qserver")
+    parser.add_argument('server')
+    parser.add_argument('root', nargs='?')
+
+    args = parser.parse_args(argv)
+
+    xserver = args.server
     if not xserver.endswith('/'):
         xserver += '/'
 
-    root = '.'
-    for name in os.listdir(root):
-        d = os.path.join(root, name)
-        if os.path.isdir(d):
-            check(d)
+    root = args.root or '.'
+    for dirpath, _, _ in os.walk(root):
+        check(dirpath)
 
 if __name__=="__main__":
     main(sys.argv[1:])
-
