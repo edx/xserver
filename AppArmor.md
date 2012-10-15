@@ -1,6 +1,6 @@
 # Notes on setting up AppArmor:
 
-## First, standard unix permission:
+## First, standard unix users, permissions:
 
 ```
 $ sudo bash
@@ -25,7 +25,7 @@ $ visudo -f /etc/sudoers.d/01-sandbox
 
 Content:
 ```
-$ makeitso ALL=(sandbox) NOPASSWD: /usr/bin/python-sandbox
+makeitso ALL=(sandbox) NOPASSWD: /usr/bin/python-sandbox
 ```
 
 
