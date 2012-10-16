@@ -12,10 +12,10 @@ import os.path
 import sys
 from time import localtime, strftime
 
+
 import settings    # Not django, but do something similar
 
-import sb50.run
-
+from sandbox import sandbox
 
 # make sure we can find the grader files
 sys.path.append(settings.GRADER_ROOT)
@@ -145,7 +145,7 @@ def do_POST(data):
     log.debug("Processing submission, grader payload: {0}".format(payload))
     relative_grader_path = grader_config['grader']
     grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
-    results = grade.grade(grader_path, student_response, sb50.run)
+    results = grade.grade(grader_path, student_response, sandbox)
 
 
     # Make valid JSON message
