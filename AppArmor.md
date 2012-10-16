@@ -57,8 +57,9 @@ sandbox       hard   nice     19
 
 ## Set up apparmor itself
 
+```
 apt-get install apparmor-utils
-
+```
 
 Making a profile for python-sandbox, in `/etc/apparmor.d/usr.bin.python-sandbox`
 
@@ -74,7 +75,7 @@ Making a profile for python-sandbox, in `/etc/apparmor.d/usr.bin.python-sandbox`
   /usr/lib/python2.7** rix,
 
   /tmp/** rix,
-}}
+}
 ```
 
 Start enforcing it:
