@@ -85,7 +85,19 @@ def check(dirname):
         if len(graders) > 1:
             print "More than one grader in {0}".format(dirname)
             return
-        payload = json.dumps({'grader': os.path.abspath(graders[0])})
+        # strip off everything up to and including graders/
+
+        p = os.path.abspath(graders[0])
+        index = p.find('graders/')
+        if index < 0:
+            #
+            print ("{0} is not in the 6.00x graders dir, and there's no payload.json file"
+                    ", so we don't know how to grade it".format(p))
+            return
+        else:
+            grader_path = p[index + len('graders/'):]
+            print 'grader_path: ' + grader_path
+        payload = json.dumps({'grader': grader_path})
 
     for name in globs(dirname, 'answer*.py', 'right*.py'):
         print "Checking correct response from {0}".format(name)

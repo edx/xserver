@@ -1,3 +1,5 @@
+import settings
+
 """
 """
 
@@ -19,4 +21,7 @@ def sandbox_cmd_list():
     run logic here too, but then we'd have to duplicate it for testing in the
     content repo.
     """
-    return ['sudo', '-u', 'sandbox', '/usr/bin/python-sandbox']
+    if settings.DO_SANDBOXING:
+        return ['sudo', '-u', 'sandbox', '/usr/bin/python-sandbox']
+    else:
+        return ['python']

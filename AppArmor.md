@@ -31,7 +31,18 @@ makeitso ALL=(sandbox) NOPASSWD: /usr/bin/python-sandbox
 
 ## Set up some process limits
 
-In `/etc/security/limits.d/untrusted.conf`
+Enable them:
+
+In `/etc/pam.d/common-session`, add
+
+```
+session required pam_limits.so
+```
+
+reboot.
+
+
+In `/etc/security/limits.d/sandbox.conf`
 
 ```
 sandbox       hard   core  0
