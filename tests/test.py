@@ -12,6 +12,7 @@ import json
 import os
 import os.path
 from path import path
+import pprint
 import requests
 import sys
 import time
@@ -41,19 +42,15 @@ def send(payload, answer):
     return r.text
 
 
-def check_contains(string, substr):
-    if not substr in string:
-        print "ERROR: Expected '{0}' in '{1}'".format(substr, string)
+def check_output(data, expected_correct):
+    try:
+        d = json.loads(data)
+        if d["correct"] != expected_correct:
+            print "ERROR: expected correct={0}.  Message: {1}".format(
+                expected_correct, pprint.pformat(d))
 
-def check_not_contains(string, substr):
-    if substr in string:
-        print "ERROR: Expected '{0}' not to be in '{1}'".format(substr, string)
-
-def check_right(string):
-    check_contains(string, '\"correct\": true')
-
-def check_wrong(string):
-    check_contains(string, '\"correct\": false')
+    except ValueError:
+        print "ERROR: invalid json %r" % data
 
 def globs(dirname, *patterns):
     """
@@ -102,12 +99,12 @@ def check(dirname):
     for name in globs(dirname, 'answer*.py', 'right*.py'):
         print "Checking correct response from {0}".format(name)
         answer = contents(name)
-        check_right(send(payload, answer))
+        check_output(send(payload, answer), expected_correct=True)
 
     for name in globs(dirname, 'wrong*.py'):
         print "Checking wrong response from {0}".format(name)
         answer = contents(name)
-        check_wrong(send(payload, answer))
+        check_output(send(payload, answer), expected_correct=False)
 
 def main(argv):
     global xserver

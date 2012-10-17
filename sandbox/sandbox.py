@@ -1,7 +1,12 @@
+"""
+Setup for apparmor-based sandbox.
+"""
+
+import logging
+
 import settings
 
-"""
-"""
+log = logging.getLogger(__name__)
 
 def record_suspicious_submission(msg, code_str):
     """
