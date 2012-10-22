@@ -2,6 +2,8 @@
 #------------------------------------------------------------
 # Run me with (may need su privilege for logging):
 #        gunicorn -w 4 -b 127.0.0.1:3031 pyxserver_wsgi:application
+#  (remove the -w 4 for debugging--don't want 4 workers)
+# gunicorn --preload -b 127.0.0.1:3031 --timeout=35 --pythonpath=. pyxserver_wsgi:application
 #------------------------------------------------------------
 
 import cgi    # for the escape() function
@@ -9,9 +11,9 @@ import json
 import logging
 import os
 import os.path
+from statsd import statsd
 import sys
-from time import localtime, strftime
-
+from time import localtime, strftime, time
 
 import settings    # Not django, but do something similar
 
@@ -125,6 +127,7 @@ def do_GET(data):
 
 
 def do_POST(data):
+    statsd.increment('xserver.post-requests')
     # This server expects jobs to be pushed to it from the queue
     xpackage = json.loads(data)
     body  = xpackage['xqueue_body']
@@ -139,19 +142,24 @@ def do_POST(data):
     except ValueError as err:
         # If parsing json fails, erroring is fine--something is wrong in the content.
         # However, for debugging, still want to see what the problem is
+        statsd.increment('xserver.grader_payload_error')
+
         log.debug("error parsing: '{0}' -- {1}".format(payload, err))
         raise
 
     log.debug("Processing submission, grader payload: {0}".format(payload))
     relative_grader_path = grader_config['grader']
     grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
+    start = time()
     results = grade.grade(grader_path, student_response, sandbox)
-
-
+    statsd.histogram('xserver.grading-time', time() - start)
+    
     # Make valid JSON message
     reply = { 'correct': results['correct'],
               'score': results['score'],
               'msg': render_results(results) }
+
+    statsd.increment('xserver.post-replies (non-exception)')
 
     return json.dumps(reply)
 
