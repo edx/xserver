@@ -28,7 +28,7 @@ logging.config.dictConfig(settings.LOGGING)
 log = logging.getLogger("xserver." + __name__)
 
 
-results_template = """
+results_template = u"""
 <div class="test">
 <header>Test results</header>
   <section>
@@ -44,7 +44,7 @@ results_template = """
 """
 
 
-results_correct_template = """
+results_correct_template = u"""
   <div class="result-output result-correct">
     <h4>{short-description}</h4>
     <p>{long-description}</p>
@@ -58,7 +58,7 @@ results_correct_template = """
 """
 
 
-results_incorrect_template = """
+results_incorrect_template = u"""
   <div class="result-output result-incorrect">
     <h4>{short-description}</h4>
     <p>{long-description}</p>
@@ -77,9 +77,9 @@ def format_errors(errors):
     error_string = ''
     error_list = [esc(e) for e in errors or []]
     if error_list:
-        items = '\n'.join(['<li><pre>{0}</pre></li>\n'.format(e) for e in error_list])
-        error_string = '<ul>\n{0}</ul>\n'.format(items)
-        error_string = '<div class="result-errors">{0}</div>'.format(error_string)
+        items = u'\n'.join([u'<li><pre>{0}</pre></li>\n'.format(e) for e in error_list])
+        error_string = u'<ul>\n{0}</ul>\n'.format(items)
+        error_string = u'<div class="result-errors">{0}</div>'.format(error_string)
     return error_string
 
 
@@ -88,9 +88,9 @@ def to_dict(result):
     # TODO: replace with mako template
     esc = cgi.escape
     if result[1]:
-        long_desc = '<p>{0}</p>'.format(esc(result[1]))
+        long_desc = u'<p>{0}</p>'.format(esc(result[1]))
     else:
-        long_desc = ''
+        long_desc = u''
     return {'short-description': esc(result[0]),
             'long-description': long_desc,
             'correct': result[2],   # Boolean; don't escape.
