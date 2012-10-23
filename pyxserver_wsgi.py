@@ -2,6 +2,8 @@
 #------------------------------------------------------------
 # Run me with (may need su privilege for logging):
 #        gunicorn -w 4 -b 127.0.0.1:3031 pyxserver_wsgi:application
+#  (remove the -w 4 for debugging--don't want 4 workers)
+# gunicorn --preload -b 127.0.0.1:3031 --timeout=35 --pythonpath=. pyxserver_wsgi:application
 #------------------------------------------------------------
 
 import cgi    # for the escape() function
@@ -9,13 +11,13 @@ import json
 import logging
 import os
 import os.path
+from statsd import statsd
 import sys
-from time import localtime, strftime
+from time import localtime, strftime, time
 
 import settings    # Not django, but do something similar
 
-import sb50.run
-
+from sandbox import sandbox
 
 # make sure we can find the grader files
 sys.path.append(settings.GRADER_ROOT)
@@ -26,7 +28,7 @@ logging.config.dictConfig(settings.LOGGING)
 log = logging.getLogger("xserver." + __name__)
 
 
-results_template = """
+results_template = u"""
 <div class="test">
 <header>Test results</header>
   <section>
@@ -42,7 +44,7 @@ results_template = """
 """
 
 
-results_correct_template = """
+results_correct_template = u"""
   <div class="result-output result-correct">
     <h4>{short-description}</h4>
     <p>{long-description}</p>
@@ -56,7 +58,7 @@ results_correct_template = """
 """
 
 
-results_incorrect_template = """
+results_incorrect_template = u"""
   <div class="result-output result-incorrect">
     <h4>{short-description}</h4>
     <p>{long-description}</p>
@@ -75,9 +77,9 @@ def format_errors(errors):
     error_string = ''
     error_list = [esc(e) for e in errors or []]
     if error_list:
-        items = '\n'.join(['<li><pre>{0}</pre></li>\n'.format(e) for e in error_list])
-        error_string = '<ul>\n{0}</ul>\n'.format(items)
-        error_string = '<div class="result-errors">{0}</div>'.format(error_string)
+        items = u'\n'.join([u'<li><pre>{0}</pre></li>\n'.format(e) for e in error_list])
+        error_string = u'<ul>\n{0}</ul>\n'.format(items)
+        error_string = u'<div class="result-errors">{0}</div>'.format(error_string)
     return error_string
 
 
@@ -86,9 +88,9 @@ def to_dict(result):
     # TODO: replace with mako template
     esc = cgi.escape
     if result[1]:
-        long_desc = '<p>{0}</p>'.format(esc(result[1]))
+        long_desc = u'<p>{0}</p>'.format(esc(result[1]))
     else:
-        long_desc = ''
+        long_desc = u''
     return {'short-description': esc(result[0]),
             'long-description': long_desc,
             'correct': result[2],   # Boolean; don't escape.
@@ -125,6 +127,7 @@ def do_GET(data):
 
 
 def do_POST(data):
+    statsd.increment('xserver.post-requests')
     # This server expects jobs to be pushed to it from the queue
     xpackage = json.loads(data)
     body  = xpackage['xqueue_body']
@@ -139,19 +142,24 @@ def do_POST(data):
     except ValueError as err:
         # If parsing json fails, erroring is fine--something is wrong in the content.
         # However, for debugging, still want to see what the problem is
+        statsd.increment('xserver.grader_payload_error')
+
         log.debug("error parsing: '{0}' -- {1}".format(payload, err))
         raise
 
     log.debug("Processing submission, grader payload: {0}".format(payload))
     relative_grader_path = grader_config['grader']
     grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
-    results = grade.grade(grader_path, student_response, sb50.run)
-
-
+    start = time()
+    results = grade.grade(grader_path, student_response, sandbox)
+    statsd.histogram('xserver.grading-time', time() - start)
+    
     # Make valid JSON message
     reply = { 'correct': results['correct'],
               'score': results['score'],
               'msg': render_results(results) }
+
+    statsd.increment('xserver.post-replies (non-exception)')
 
     return json.dumps(reply)
 

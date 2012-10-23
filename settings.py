@@ -28,6 +28,9 @@ LOGGING = get_logger_config(ENV_ROOT / "log",
 
 GRADER_ROOT = os.path.abspath(os.path.join(ENV_ROOT, 'data/6.00x/graders'))
 
+# Dev setting.
+DO_SANDBOXING = False
+
 # AWS
 
 if os.path.isfile(ENV_ROOT / "env.json"):
@@ -35,7 +38,9 @@ if os.path.isfile(ENV_ROOT / "env.json"):
     with open(ENV_ROOT / "env.json") as env_file:
         ENV_TOKENS = json.load(env_file)
 
-    RUN_URL = ENV_TOKENS['RUN_URL']
+    # True by default!  Don't want messed up config to let students run regular python!
+    DO_SANDBOXING = ENV_TOKENS.get('DO_SANDBOXING', True)
+
 
     LOG_DIR = ENV_TOKENS['LOG_DIR']
     local_loglevel = ENV_TOKENS.get('LOCAL_LOGLEVEL', 'INFO')

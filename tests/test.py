@@ -12,6 +12,7 @@ import json
 import os
 import os.path
 from path import path
+import pprint
 import requests
 import sys
 import time
@@ -41,19 +42,19 @@ def send(payload, answer):
     return r.text
 
 
-def check_contains(string, substr):
-    if not substr in string:
-        print "ERROR: Expected '{0}' in '{1}'".format(substr, string)
+def check_output(data, verbose, expected_correct):
+    try:
+        d = json.loads(data)
+        if d["correct"] != expected_correct:
+            print "ERROR: expected correct={0}.  Message: {1}".format(
+                expected_correct, pprint.pformat(d))
 
-def check_not_contains(string, substr):
-    if substr in string:
-        print "ERROR: Expected '{0}' not to be in '{1}'".format(substr, string)
+        elif verbose:
+            print "Output: "
+            pprint.pprint(d) 
 
-def check_right(string):
-    check_contains(string, '\"correct\": true')
-
-def check_wrong(string):
-    check_contains(string, '\"correct\": false')
+    except ValueError:
+        print "ERROR: invalid json %r" % data
 
 def globs(dirname, *patterns):
     """
@@ -70,7 +71,7 @@ def contents(fname):
     with open(fname) as f:
         return f.read()
 
-def check(dirname):
+def check(dirname, verbose):
     """
     Look for payload.json, answer*.py, right*.py, wrong*.py, run tests.
     """
@@ -85,17 +86,29 @@ def check(dirname):
         if len(graders) > 1:
             print "More than one grader in {0}".format(dirname)
             return
-        payload = json.dumps({'grader': os.path.abspath(graders[0])})
+        # strip off everything up to and including graders/
+
+        p = os.path.abspath(graders[0])
+        index = p.find('graders/')
+        if index < 0:
+            #
+            print ("{0} is not in the 6.00x graders dir, and there's no payload.json file"
+                    ", so we don't know how to grade it".format(p))
+            return
+        else:
+            grader_path = p[index + len('graders/'):]
+            print 'grader_path: ' + grader_path
+        payload = json.dumps({'grader': grader_path})
 
     for name in globs(dirname, 'answer*.py', 'right*.py'):
         print "Checking correct response from {0}".format(name)
         answer = contents(name)
-        check_right(send(payload, answer))
+        check_output(send(payload, answer), verbose, expected_correct=True)
 
     for name in globs(dirname, 'wrong*.py'):
         print "Checking wrong response from {0}".format(name)
         answer = contents(name)
-        check_wrong(send(payload, answer))
+        check_output(send(payload, answer), verbose, expected_correct=False)
 
 def main(argv):
     global xserver
@@ -103,6 +116,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description="Send dummy requests to a qserver")
     parser.add_argument('server')
     parser.add_argument('root', nargs='?')
+    parser.add_argument('-v', dest='verbose', action='store_true', help="verbose")
 
     args = parser.parse_args(argv)
 
@@ -112,7 +126,7 @@ def main(argv):
 
     root = args.root or '.'
     for dirpath, _, _ in os.walk(root):
-        check(dirpath)
+        check(dirpath, args.verbose)
 
 if __name__=="__main__":
     main(sys.argv[1:])

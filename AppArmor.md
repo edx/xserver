@@ -25,13 +25,24 @@ $ visudo -f /etc/sudoers.d/01-sandbox
 
 Content:
 ```
-makeitso ALL=(sandbox) NOPASSWD: /usr/bin/python-sandbox
+makeitso ALL=(sandbox) NOPASSWD:/usr/bin/python-sandbox
 ```
 
 
 ## Set up some process limits
 
-In `/etc/security/limits.d/untrusted.conf`
+Enable them:
+
+In `/etc/pam.d/common-session`, add
+
+```
+session required pam_limits.so
+```
+
+reboot.
+
+
+In `/etc/security/limits.d/sandbox.conf`
 
 ```
 sandbox       hard   core  0
@@ -41,7 +52,7 @@ sandbox       hard   memlock 10000
 sandbox       hard   nofile 20
 sandbox       hard   rss    10000
 sandbox       hard   stack  100000
-sandbox       hard   cpu    1
+sandbox       hard   cpu    0
 sandbox       hard   nproc  8
 sandbox       hard   as     32000
 sandbox       hard   maxlogins  1
@@ -52,7 +63,7 @@ sandbox       hard   msgqueue  100000
 sandbox       hard   nice     19
 ```
 
-(these may not be the right params, but it's a start)
+(these may not be the right params, but it's a start).  NOTE: `cpu` is specified in minutes, so 1 is 60 seconds, but it appears that setting it to zero makes it 1 second.  Also, in bash, one can do e.g. `ulimit -t 5` to set the timeout to 5 seconds.
 
 
 ## Set up apparmor itself
@@ -94,3 +105,6 @@ TODO:
 - put code checking tests on a branch of 6.00x.  Deploy.
 - Set it up.  Run mean tests.
 
+Misc:
+
+http://comments.gmane.org/gmane.comp.security.apparmor/990
