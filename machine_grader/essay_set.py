@@ -52,8 +52,9 @@ class essay_set:
 
             ret="text: " + self._text[len(self._text)-1] + " score: " + str(essay_score)
         else:
-            raise util_functions.InputError(essay_text,"arguments need to be in format (text,score). "
-                                                       "text needs to be string, score needs to be int.")
+            raise util_functions.InputError(essay_text,"arguments need to be in format "
+                                                       "(text,score). text needs to be string,"
+                                                       " score needs to be int.")
         return ret
 
     #Update the default prompt string, which is ""
