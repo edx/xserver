@@ -4,7 +4,7 @@ Runnable files:
 
 1. create_test_models.py 
 
-	Generates test models when used like: python create_test_models.py train_file prompt_file model_path.  Use python create_test_models.py train.tsv prompt.txt models/essay_set_1.txt to generate a model using sample data.
+	Generates test models when used like: python create_test_models.py train_file prompt_file model_path.  Use python create_test_models.py train.tsv prompt.txt models/essay_set_1.p to generate a model using sample data.
 
 2. pyxserver_wsgi.py
 
