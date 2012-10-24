@@ -8,7 +8,7 @@ Runnable files:
 
 2. pyxserver_wsgi.py
 
-	Starts a server instance that can be sent answers to score.  Calls grade.py to score responses.  Run server with unicorn -w 4 -b 127.0.0.1:3031 pyxserver_wsgi:application .
+	Starts a server instance that can be sent answers to score.  Calls grade.py to score responses.  Run server with gunicorn -w 4 -b 127.0.0.1:3031 pyxserver_wsgi:application .
 
 3. tests/test.py
 
