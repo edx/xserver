@@ -21,3 +21,4 @@ reports/
 /src/
 \#*\#
 *.egg-info
+/machine_grader/.idea/*
