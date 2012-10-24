@@ -26,7 +26,7 @@
       <file leaf-file-name="essay_set.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/essay_set.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="65" selection-start="150" selection-end="150" vertical-scroll-proportion="0.0">
+            <state line="67" column="68" selection-start="2843" selection-end="2843" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -68,28 +68,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="answer.txt" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests/simple_essay/answer.txt">
+      <file leaf-file-name="create_test_models.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/create_test_models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="539" selection-start="539" selection-end="539" vertical-scroll-proportion="0.0">
+            <state line="0" column="85" selection-start="85" selection-end="85" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="test.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests/test.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="95" column="45" selection-start="2599" selection-end="2599" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="model_creator.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="model_creator.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/model_creator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="49" selection-start="49" selection-end="49" vertical-scroll-proportion="0.0">
+            <state line="55" column="0" selection-start="1624" selection-end="1624" vertical-scroll-proportion="0.5801688">
               <folding>
                 <element signature="e#57#69#0" expanded="true" />
               </folding>
@@ -97,24 +88,31 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="create_test_models.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/create_test_models.py">
+      <file leaf-file-name="feature_extractor.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/feature_extractor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="85" selection-start="85" selection-end="85" vertical-scroll-proportion="0.0">
+            <state line="0" column="56" selection-start="56" selection-end="56" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="module_render.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../../mitx/lms/djangoapps/courseware/module_render.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
               <folding>
-                <element signature="e#87#96#0" expanded="true" />
+                <element signature="e#0#14#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="feature_extractor.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/feature_extractor.py">
+      <file leaf-file-name="Readme.md" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Readme.md">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="56" selection-start="56" selection-end="56" vertical-scroll-proportion="0.0">
-              <folding>
-                <element signature="e#58#70#0" expanded="true" />
-              </folding>
+            <state line="10" column="117" selection-start="576" selection-end="634" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -132,12 +130,12 @@
         <option value="$PROJECT_DIR$/tests/simple_essay/answer.txt" />
         <option value="$PROJECT_DIR$/grade.py" />
         <option value="$PROJECT_DIR$/util_functions.py" />
-        <option value="$PROJECT_DIR$/essay_set.py" />
         <option value="$PROJECT_DIR$/tests/simple_essay/payload.json" />
         <option value="$PROJECT_DIR$/tests/test.py" />
         <option value="$PROJECT_DIR$/model_creator.py" />
         <option value="$PROJECT_DIR$/create_test_models.py" />
         <option value="$PROJECT_DIR$/feature_extractor.py" />
+        <option value="$PROJECT_DIR$/essay_set.py" />
       </list>
     </option>
   </component>
@@ -231,11 +229,11 @@
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="options.lastSelected" value="project.propDebugger" />
     <property name="recentsLimit" value="5" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/feature_extractor.py" />
-    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.lastSelected" value="project.propDebugger" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/model_creator.py" />
     <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -370,11 +368,11 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25235173" sideWeight="0.81448275" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2548057" sideWeight="0.81448275" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.15172414" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18551724" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.18495935" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -447,52 +445,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/tests/simple_essay/payload.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="11" selection-start="11" selection-end="11" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="115" column="39" selection-start="3194" selection-end="3194" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/model_creator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="27" selection-start="181" selection-end="181" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#57#69#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/create_test_models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="0" selection-start="811" selection-end="811" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#87#96#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/train.tsv">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="174" column="498" selection-start="46244" selection-end="46244" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/model_creator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="49" selection-start="49" selection-end="49" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#57#69#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tests/test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="95" column="45" selection-start="2599" selection-end="2599" vertical-scroll-proportion="0.0">
@@ -502,9 +454,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/simple_essay/payload.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="11" selection-start="11" selection-end="11" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="0" column="11" selection-start="11" selection-end="11" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/simple_essay/answer.txt">
@@ -535,13 +485,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/essay_set.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="65" selection-start="150" selection-end="150" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/util_functions.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="40" column="38" selection-start="1112" selection-end="1112" vertical-scroll-proportion="0.0">
@@ -549,20 +492,65 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/create_test_models.py">
+    <entry file="file://$PROJECT_DIR$/feature_extractor.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="85" selection-start="85" selection-end="85" vertical-scroll-proportion="0.0">
+        <state line="0" column="56" selection-start="56" selection-end="56" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../mitx/lms/djangoapps/courseware/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-2.1856027" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../mitx/common/djangoapps/student/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-3.2393756" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../mitx/README">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../mitx/lms/djangoapps/courseware/module_render.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
           <folding>
-            <element signature="e#87#96#0" expanded="true" />
+            <element signature="e#0#14#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/feature_extractor.py">
+    <entry file="file://$PROJECT_DIR$/Readme.md">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="56" selection-start="56" selection-end="56" vertical-scroll-proportion="0.0">
+        <state line="10" column="117" selection-start="576" selection-end="634" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/essay_set.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="67" column="68" selection-start="2843" selection-end="2843" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/create_test_models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="85" selection-start="85" selection-end="85" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/model_creator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="55" column="0" selection-start="1624" selection-end="1624" vertical-scroll-proportion="0.5801688">
           <folding>
-            <element signature="e#58#70#0" expanded="true" />
+            <element signature="e#57#69#0" expanded="true" />
           </folding>
         </state>
       </provider>
