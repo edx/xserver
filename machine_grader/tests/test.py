@@ -112,7 +112,7 @@ def main(argv):
         xserver += '/'
 
     #root = args.root or '.'
-    root="/home/vik/mitx_all/vik_sandbox/machine_grader/tests/"
+    root=os.path.dirname( os.path.abspath(__file__ ))
     for dirpath, _, _ in os.walk(root):
         print("checking" + dirpath)
         check(dirpath)
