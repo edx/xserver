@@ -77,19 +77,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="payload.json" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests/simple_essay/payload.json">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="11" selection-start="11" selection-end="11" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="test.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="test.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="95" column="45" selection-start="2599" selection-end="2599" vertical-scroll-proportion="0.5836947">
+            <state line="95" column="45" selection-start="2599" selection-end="2599" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -98,8 +89,10 @@
       <file leaf-file-name="model_creator.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/model_creator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="12" selection-start="195" selection-end="222" vertical-scroll-proportion="0.0">
-              <folding />
+            <state line="0" column="49" selection-start="49" selection-end="49" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="e#57#69#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -107,9 +100,20 @@
       <file leaf-file-name="create_test_models.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/create_test_models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="22" column="28" selection-start="615" selection-end="615" vertical-scroll-proportion="0.0">
+            <state line="0" column="85" selection-start="85" selection-end="85" vertical-scroll-proportion="0.0">
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
+                <element signature="e#87#96#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="feature_extractor.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/feature_extractor.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="56" selection-start="56" selection-end="56" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="e#58#70#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -129,10 +133,11 @@
         <option value="$PROJECT_DIR$/grade.py" />
         <option value="$PROJECT_DIR$/util_functions.py" />
         <option value="$PROJECT_DIR$/essay_set.py" />
-        <option value="$PROJECT_DIR$/model_creator.py" />
-        <option value="$PROJECT_DIR$/create_test_models.py" />
         <option value="$PROJECT_DIR$/tests/simple_essay/payload.json" />
         <option value="$PROJECT_DIR$/tests/test.py" />
+        <option value="$PROJECT_DIR$/model_creator.py" />
+        <option value="$PROJECT_DIR$/create_test_models.py" />
+        <option value="$PROJECT_DIR$/feature_extractor.py" />
       </list>
     </option>
   </component>
@@ -228,7 +233,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="options.lastSelected" value="project.propDebugger" />
     <property name="recentsLimit" value="5" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/pyxserver_wsgi.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/feature_extractor.py" />
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
   </component>
@@ -459,7 +464,9 @@
     <entry file="file://$PROJECT_DIR$/model_creator.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="8" column="27" selection-start="181" selection-end="181" vertical-scroll-proportion="0.0">
-          <folding />
+          <folding>
+            <element signature="e#57#69#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -467,16 +474,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="27" column="0" selection-start="811" selection-end="811" vertical-scroll-proportion="0.0">
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/feature_extractor.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="46" column="37" selection-start="1718" selection-end="1718" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
+            <element signature="e#87#96#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -486,37 +484,18 @@
         <state line="174" column="498" selection-start="46244" selection-end="46244" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/essay_set.py">
+    <entry file="file://$PROJECT_DIR$/model_creator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="65" selection-start="150" selection-end="150" vertical-scroll-proportion="0.0">
-          <folding />
+        <state line="0" column="49" selection-start="49" selection-end="49" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#57#69#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/settings.py">
+    <entry file="file://$PROJECT_DIR$/tests/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/util_functions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="40" column="38" selection-start="1112" selection-end="1112" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/grade.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="56" selection-start="1592" selection-end="1592" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pyxserver_wsgi.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="95" column="45" selection-start="2599" selection-end="2599" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -528,15 +507,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/create_test_models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="28" selection-start="615" selection-end="615" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tests/simple_essay/answer.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="539" selection-start="539" selection-end="539" vertical-scroll-proportion="0.0">
@@ -544,17 +514,56 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/model_creator.py">
+    <entry file="file://$PROJECT_DIR$/pyxserver_wsgi.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="12" selection-start="195" selection-end="222" vertical-scroll-proportion="0.0">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/test.py">
+    <entry file="file://$PROJECT_DIR$/grade.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="95" column="45" selection-start="2599" selection-end="2599" vertical-scroll-proportion="0.5836947">
+        <state line="47" column="56" selection-start="1592" selection-end="1592" vertical-scroll-proportion="0.0">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/essay_set.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1" column="65" selection-start="150" selection-end="150" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/util_functions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="40" column="38" selection-start="1112" selection-end="1112" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/create_test_models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="85" selection-start="85" selection-end="85" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#87#96#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/feature_extractor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="56" selection-start="56" selection-end="56" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#58#70#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

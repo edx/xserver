@@ -1,3 +1,5 @@
+#Run with arguments train_file prompt_file model_path to generate a sample model file
+
 import os
 import sys
 import argparse

@@ -1,3 +1,5 @@
+#Extracts features from training set and test set essays
+
 import numpy
 import re
 import nltk

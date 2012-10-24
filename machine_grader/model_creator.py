@@ -1,3 +1,5 @@
+#Provides interface functions to create and save models
+
 import numpy
 import re
 import nltk
@@ -33,7 +35,7 @@ def read_in_test_prompt(filename):
     prompt_string=open(filename).read()
     return prompt_string
 
-
+#Create an essay set.  text and score should be lists of strings and ints, respectively.
 def create_essay_set(text,score,prompt_string,generate_additional=True):
     x=essay_set()
     for i in xrange(0,len(text)):
@@ -45,18 +47,22 @@ def create_essay_set(text,score,prompt_string,generate_additional=True):
 
     return x
 
+#Feed in an essay set to get feature vector and classifier
 def extract_features_and_generate_model(essays):
     f=feature_extractor.feature_extractor()
     f.initialize_dictionaries(essays)
 
     train_feats=f.gen_feats(essays)
 
-    clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,max_depth=4, random_state=1,min_samples_leaf=3)
+    clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
+                                                      max_depth=4, random_state=1,
+                                                      min_samples_leaf=3)
 
     model=util_functions.gen_model(clf,train_feats,essays._score)
 
     return f,clf
 
+#Writes out model to pickle file
 def dump_model_to_file(prompt_string,feature_ext,classifier,model_path):
     model_file={'prompt': prompt_string, 'extractor' : feature_ext, 'model' : classifier}
     pickle.dump(model_file,file=open(model_path,"w"))
