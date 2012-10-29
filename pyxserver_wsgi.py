@@ -151,9 +151,16 @@ def do_POST(data):
     relative_grader_path = grader_config['grader']
     grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
     start = time()
-    results = grade.grade(grader_path, student_response, sandbox)
+    # TODO: Temporary code, to make transition easier: once all deployed versions of 6.00 have code
+    # that expects grade() to be passed the grader payload dict, will get rid of the conditional.
+    if hasattr(grade, 'TEMPORARY_WANTS_CONFIG'):
+        results = grade.grade(grader_path, student_response, sandbox, grader_config)
+    else:
+        # old version didn't take the config
+        results = grade.grade(grader_path, student_response, sandbox)
+
     statsd.histogram('xserver.grading-time', time() - start)
-    
+
     # Make valid JSON message
     reply = { 'correct': results['correct'],
               'score': results['score'],
