@@ -154,7 +154,7 @@ def do_POST(data):
     # TODO: Temporary code, to make transition easier: once all deployed versions of 6.00 have code
     # that expects grade() to be passed the grader payload dict, will get rid of the conditional.
     if hasattr(grade, 'TEMPORARY_WANTS_CONFIG'):
-        results = grade.grade(grader_path, student_response, sandbox, grader_config)
+        results = grade.grade(grader_path, grader_config, student_response, sandbox)
     else:
         # old version didn't take the config
         results = grade.grade(grader_path, student_response, sandbox)
