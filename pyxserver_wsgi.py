@@ -166,6 +166,10 @@ def do_POST(data):
               'score': results['score'],
               'msg': render_results(results) }
 
+    #Check for feedback dict and return it if it exists
+    if 'feedback' in results:
+        reply['feedback']=results['feedback']
+
     statsd.increment('xserver.post-replies (non-exception)')
 
     return json.dumps(reply)
