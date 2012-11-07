@@ -8,7 +8,7 @@ import sys
 
 ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH
-ENV_ROOT = REPO_PATH.dirname()
+ENV_ROOT = path('/home/vik/mitx_all/')
 
 # DEFAULTS
 
@@ -26,7 +26,7 @@ LOGGING = get_logger_config(ENV_ROOT / "log",
                             dev_env=True,
                             debug=True)
 
-GRADER_ROOT = os.path.abspath(os.path.join(ENV_ROOT, 'data/6.00x/graders'))
+GRADER_ROOT = os.path.abspath(os.path.join(ENV_ROOT, 'machine_learning/'))
 
 # Dev setting.
 DO_SANDBOXING = False
