@@ -47,7 +47,7 @@ results_template = u"""
 results_correct_template = u"""
   <div class="result-output result-correct">
     <h4>{short-description}</h4>
-    <p>{long-description}</p>
+    <pre>{long-description}</pre>
     <dl>
     <dt>Output:</dt>
     <dd class="result-actual-output">
@@ -61,7 +61,7 @@ results_correct_template = u"""
 results_incorrect_template = u"""
   <div class="result-output result-incorrect">
     <h4>{short-description}</h4>
-    <p>{long-description}</p>
+    <pre>{long-description}</pre>
     <dl>
     <dt>Your output:</dt>
     <dd class="result-actual-output"><pre>{actual-output}</pre></dd>
@@ -151,13 +151,7 @@ def do_POST(data):
     relative_grader_path = grader_config['grader']
     grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
     start = time()
-    # TODO: Temporary code, to make transition easier: once all deployed versions of 6.00 have code
-    # that expects grade() to be passed the grader payload dict, will get rid of the conditional.
-    if hasattr(grade, 'TEMPORARY_WANTS_CONFIG'):
-        results = grade.grade(grader_path, grader_config, student_response, sandbox)
-    else:
-        # old version didn't take the config
-        results = grade.grade(grader_path, student_response, sandbox)
+    results = grade.grade(grader_path, grader_config, student_response, sandbox)
 
     statsd.histogram('xserver.grading-time', time() - start)
 
