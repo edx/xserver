@@ -47,7 +47,7 @@ results_template = u"""
 results_correct_template = u"""
   <div class="result-output result-correct">
     <h4>{short-description}</h4>
-    <p><pre>{long-description}</pre></p>
+    <pre>{long-description}</pre>
     <dl>
     <dt>Output:</dt>
     <dd class="result-actual-output">
@@ -61,7 +61,7 @@ results_correct_template = u"""
 results_incorrect_template = u"""
   <div class="result-output result-incorrect">
     <h4>{short-description}</h4>
-    <p><pre>{long-description}</pre></p>
+    <pre>{long-description}</pre>
     <dl>
     <dt>Your output:</dt>
     <dd class="result-actual-output"><pre>{actual-output}</pre></dd>
