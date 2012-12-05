@@ -1,0 +1,10 @@
+Django >= 1.4, < 1.5
+pika
+django_nose
+nosexcover
+rednose
+requests
+boto
+path.py
+dogstatsd-python==0.2
+south
