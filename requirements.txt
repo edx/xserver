@@ -6,5 +6,8 @@ rednose
 requests
 boto
 path.py
-dogstatsd-python==0.2
+dogstatsd-python
 south
+anyjson
+numpy
+lxml
