@@ -11,3 +11,4 @@ south
 anyjson
 numpy
 lxml
+newrelic
