@@ -35,7 +35,7 @@ which is then used as a string in a JSON object.
 Your response must have a JSON object as a body, with these keys:
 
     "correct": true or false
-    "score": A numeric value to assign to the answer, we often use 0 or 1.
+    "score": A numeric (int or float) value to assign to the answer, we often use 0 or 1.
     "msg": An HTML string, will be shown to user.
 
 
