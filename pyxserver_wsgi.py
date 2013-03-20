@@ -77,16 +77,9 @@ def format_errors(errors):
     error_string = ''
     error_list = [esc(e) for e in errors or []]
     if error_list:
-        try:
-            items = u'\n'.join([u'<li><pre>{0}</pre></li>\n'.format(e) for e in error_list])
-            error_string = u'<ul>\n{0}</ul>\n'.format(items)
-            error_string = u'<div class="result-errors">{0}</div>'.format(error_string)
-        except UnicodeDecodeError:
-            # See http://wiki.python.org/moin/UnicodeDecodeError; this error happens in the above unicode encoding
-            # because it's assuming str `e` is in ascii encoding; when it is in Unicode already it gets sad.
-            items = '\n'.join(['<li><pre>{0}</pre></li>\n'.format(e) for e in error_list])
-            error_string = '<ul>\n{0}</ul>\n'.format(items)
-            error_string = '<div class="result-errors">{0}</div>'.format(error_string)
+        items = u'\n'.join([u'<li><pre>{0}</pre></li>\n'.format(e) for e in error_list])
+        error_string = u'<ul>\n{0}</ul>\n'.format(items)
+        error_string = u'<div class="result-errors">{0}</div>'.format(error_string)
     return error_string
 
 
