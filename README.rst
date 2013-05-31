@@ -28,14 +28,10 @@ Contributions are very welcome. The easiest way is to fork this repo, and then
 make a pull request from your fork. The first time you make a pull request, you
 may be asked to sign a Contributor Agreement.
 
-Please see ``CONTRIBUTING.rst`` for details.
-
 Reporting Security Issues
 -------------------------
 
 Please do not report security issues in public. Please email security@edx.org
-
-Please see http://code.edx.org/security/ for details.
 
 Mailing List and IRC Channel
 ----------------------------
