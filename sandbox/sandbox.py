@@ -27,6 +27,6 @@ def sandbox_cmd_list():
     content repo.
     """
     if settings.DO_SANDBOXING:
-        return ['sudo', '-u', 'sandbox', '/opt/edx/bin/python-sandbox']
+        return ['sudo', '-u', 'sandbox', settings.SANDBOX_PYTHON]
     else:
         return ['python']

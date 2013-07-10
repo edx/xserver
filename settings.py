@@ -49,3 +49,5 @@ if os.path.isfile(ENV_ROOT / "env.json"):
     # be the same for internal and external class.  Not critical -- can always
     # use different grader file if want different problems.
     GRADER_ROOT = ENV_TOKENS.get('GRADER_ROOT')
+
+    SANDBOX_PYTHON = ENV_TOKENS.get('SANDBOX_PYTHON', '/opt/edx/bin/sandbox-python')
