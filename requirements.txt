@@ -4,7 +4,7 @@ django_nose
 nosexcover
 rednose
 requests==0.14.1
-boto==2.2.2
+boto==2.6.0
 path.py
 dogstatsd-python==0.2.1
 south
