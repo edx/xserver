@@ -29,7 +29,7 @@ An example request could look like this:
     }
 
 Note that student_response in xqueue_body (and potentially grader_payload as
-well, depending on what you choose to do with it, is a JSON-encoded string,
+well, depending on what you choose to do with it), is a JSON-encoded string,
 which is then used as a string in a JSON object.
 
 Your response must have a JSON object as a body, with these keys:
