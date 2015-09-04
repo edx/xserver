@@ -1,6 +1,6 @@
 Django >= 1.4, < 1.5
 pika
-django_nose=1.4.1
+django_nose==1.4.1
 nosexcover
 rednose
 requests==0.14.1
