@@ -12,7 +12,6 @@ import json
 import logging
 import os
 import os.path
-from path import path
 import requests
 import sys
 import time
