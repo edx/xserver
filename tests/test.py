@@ -11,7 +11,6 @@ import glob
 import json
 import os
 import os.path
-from path import path
 import pprint
 import requests
 import sys

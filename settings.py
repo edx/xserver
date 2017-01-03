@@ -3,10 +3,10 @@
 import json
 import os
 from logsettings import get_logger_config
-from path import path
+from path import Path
 import sys
 
-ROOT_PATH = path(__file__).dirname()
+ROOT_PATH = Path(__file__).dirname()
 REPO_PATH = ROOT_PATH
 ENV_ROOT = REPO_PATH.dirname()
 
