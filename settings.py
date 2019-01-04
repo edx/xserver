@@ -1,6 +1,6 @@
 # Not django (for now), but use the same settings format anyway
-
-import json
+import codecs
+import yaml
 import os
 from logsettings import get_logger_config
 from path import Path
@@ -27,15 +27,20 @@ GRADER_ROOT = os.path.abspath(os.path.join(ENV_ROOT, 'data/6.00x/graders'))
 DO_SANDBOXING = False
 
 # AWS
+def get_env_setting(setting):
+    """ Get the environment setting or return exception """
+    try:
+        return environ[setting]
+    except KeyError:
+        error_msg = "Set the %s env variable" % setting
+        raise ImproperlyConfigured(error_msg)
 
-if os.path.isfile(ENV_ROOT / "env.json"):
-    print "Opening env.json file"
-    with open(ENV_ROOT / "env.json") as env_file:
-        ENV_TOKENS = json.load(env_file)
+CONFIG_FILE = get_env_setting('XSERVER_CFG')
+with codecs.open(CONFIG_FILE, encoding='utf-8') as env_file:
+    ENV_TOKENS = yaml.load(env_file)
 
     # True by default!  Don't want messed up config to let students run regular python!
     DO_SANDBOXING = ENV_TOKENS.get('DO_SANDBOXING', True)
-
 
     LOG_DIR = ENV_TOKENS['LOG_DIR']
     local_loglevel = ENV_TOKENS.get('LOCAL_LOGLEVEL', 'INFO')
