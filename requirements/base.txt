@@ -13,7 +13,7 @@ coverage==5.0.2           # via nosexcover
 django==1.4.22
 django_nose==1.4.1
 dogstatsd-python==0.2.1
-gunicorn==0.17.4
+gunicorn==19.5.0
 idna==2.8                 # via requests
 lxml==2.3.6
 newrelic==2.46.0.37

@@ -12,4 +12,4 @@ anyjson==0.3.3
 numpy==1.6.2
 lxml==2.3.6
 newrelic==2.46.0.37
-gunicorn==0.17.4
+gunicorn==19.5.0
