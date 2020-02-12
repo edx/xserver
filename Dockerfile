@@ -14,14 +14,14 @@ WORKDIR /edx/app/xserver
 COPY requirements /edx/app/xserver/requirements
 RUN pip install -r requirements/base.txt
 
-EXPOSE 8150
+EXPOSE 8050
 
 USER app
 RUN useradd -m --shell /bin/false app
-CMD gunicorn -c /edx/app/docker_gunicorn_config.py pyxserver_wsgi:application
+CMD gunicorn -c /edx/app/docker_gunicorn_config.py --bind=0.0.0.0:8000 --workers 2 --max-requests=1000 pyxserver_wsgi:application
 
 COPY . /edx/app/xserver
 
 FROM openedx as edx.org
 RUN pip install newrelic
-CMD newrelic-admin run-program gunicorn -c /edx/app/docker_gunicorn_config.py pyxserver_wsgi:application
+CMD newrelic-admin run-program gunicorn -c /edx/app/docker_gunicorn_config.py --bind=0.0.0.0:8000 --workers 2 --max-requests=1000 pyxserver_wsgi:application
