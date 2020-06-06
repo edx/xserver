@@ -4,27 +4,28 @@
 #
 #    make upgrade
 #
-anyjson==0.3.3
-boto==2.6.0
+anyjson==0.3.3            # via -r base.in
+boto==2.6.0               # via -r base.in
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
 colorama==0.4.3           # via rednose
 coverage==5.0.2           # via nosexcover
-django==1.4.22
-django_nose==1.4.1
-dogstatsd-python==0.2.1
-gunicorn==0.17.4
+django==1.11.29           # via -r base.in, django-nose
+django_nose==1.4.1        # via -r base.in
+dogstatsd-python==0.2.1   # via -r base.in
+gunicorn==0.17.4          # via -r base.in
 idna==2.8                 # via requests
-lxml==2.3.6
-newrelic==2.46.0.37
+lxml==2.3.6               # via -r base.in
+newrelic==2.46.0.37       # via -r base.in
 nose==1.3.7               # via django-nose, nosexcover
-nosexcover==1.0.11
-numpy==1.6.2
-path.py==10.0
-pika==1.1.0
-rednose==1.3.0
-requests==2.22.0
-south==1.0.2
+nosexcover==1.0.11        # via -r base.in
+numpy==1.6.2              # via -r base.in
+path.py==10.0             # via -r base.in
+pika==1.1.0               # via -r base.in
+pytz==2020.1              # via django
+rednose==1.3.0            # via -r base.in
+requests==2.22.0          # via -r base.in
+south==1.0.2              # via -r base.in
 termstyle==0.1.11         # via rednose
 urllib3==1.25.7           # via requests
 
