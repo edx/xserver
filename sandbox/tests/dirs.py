@@ -10,7 +10,7 @@ def main():
     while True:
         i += 1
         if i % 100 == 0:
-            print "Made {0} dirs!".format(i)
+            print(f"Made {i} dirs!")
         os.mkdir('deepdir')
         os.chdir('deepdir')
 

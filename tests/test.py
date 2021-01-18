@@ -32,10 +32,10 @@ def send(payload, answer):
     start = time.time()
     r = requests.post(xserver, data=json.dumps(data))
     end = time.time()
-    print "Request took %.03f sec" % (end - start)
+    print("Request took %.03f sec" % (end - start))
 
     if r.status_code != requests.codes.ok:
-        print "Request error"
+        print("Request error")
 
     #print "Text: ", r.text
     return r.text
@@ -45,23 +45,22 @@ def check_output(data, verbose, expected_correct):
     try:
         d = json.loads(data)
         if d["correct"] != expected_correct:
-            print "ERROR: expected correct={0}.  Message: {1}".format(
-                expected_correct, pprint.pformat(d))
+            print("ERROR: expected correct={}.  Message: {}".format(
+                expected_correct, pprint.pformat(d)))
 
         elif verbose:
-            print "Output: "
+            print("Output: ")
             pprint.pprint(d) 
 
     except ValueError:
-        print "ERROR: invalid json %r" % data
+        print("ERROR: invalid json %r" % data)
 
 def globs(dirname, *patterns):
     """
     Produce a sequence of all the files matching any of our patterns in dirname.
     """
     for pat in patterns:
-        for fname in glob.glob(os.path.join(dirname, pat)):
-            yield fname
+        yield from glob.glob(os.path.join(dirname, pat))
 
 def contents(fname):
     """
@@ -83,7 +82,7 @@ def check(dirname, verbose):
             #print "No payload.json or grade*.py in {0}".format(dirname)
             return
         if len(graders) > 1:
-            print "More than one grader in {0}".format(dirname)
+            print(f"More than one grader in {dirname}")
             return
         # strip off everything up to and including graders/
 
@@ -91,21 +90,21 @@ def check(dirname, verbose):
         index = p.find('graders/')
         if index < 0:
             #
-            print ("{0} is not in the 6.00x graders dir, and there's no payload.json file"
+            print("{} is not in the 6.00x graders dir, and there's no payload.json file"
                     ", so we don't know how to grade it".format(p))
             return
         else:
             grader_path = p[index + len('graders/'):]
-            print 'grader_path: ' + grader_path
+            print('grader_path: ' + grader_path)
         payload = json.dumps({'grader': grader_path})
 
     for name in globs(dirname, 'answer*.py', 'right*.py'):
-        print "Checking correct response from {0}".format(name)
+        print(f"Checking correct response from {name}")
         answer = contents(name)
         check_output(send(payload, answer), verbose, expected_correct=True)
 
     for name in globs(dirname, 'wrong*.py'):
-        print "Checking wrong response from {0}".format(name)
+        print(f"Checking wrong response from {name}")
         answer = contents(name)
         check_output(send(payload, answer), verbose, expected_correct=False)
 

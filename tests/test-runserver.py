@@ -30,7 +30,7 @@ def upload(paths):
     Given a list of paths, upload them to the sandbox, and return an id that
     identifies the created directory.
     """
-    files = dict( (os.path.basename(f)+unique, open(f)) for f in paths)
+    files = { os.path.basename(f)+unique: open(f) for f in paths}
     return upload_files(files)
 
 def upload_files(files):
@@ -38,7 +38,7 @@ def upload_files(files):
     r = requests.post(endpoint, files=files)
 
     if r.status_code != requests.codes.ok:
-        log.error("Request error: {0}".format(r.text))
+        log.error(f"Request error: {r.text}")
         return None
 
     if r.json is None:
@@ -70,9 +70,9 @@ def main(args):
     global runserver
     global upload_server
     if len(args) < 4:
-        print "Usage: test-runserver.py http://x-server-to-upload-to:port/ http://x-server-to-run-on:port/ FILES cmd"
-        print "The first file in FILES will be randomized by appending a random string,"
-        print "and the name of that file in 'cmd' will be modified the same way."
+        print("Usage: test-runserver.py http://x-server-to-upload-to:port/ http://x-server-to-run-on:port/ FILES cmd")
+        print("The first file in FILES will be randomized by appending a random string,")
+        print("and the name of that file in 'cmd' will be modified the same way.")
         sys.exit(1)
 
     upload_server = args[0]
@@ -87,14 +87,14 @@ def main(args):
 
     start = time.time()
     id = upload(files)
-    print "Upload took %.03f sec" % (time.time() - start)
+    print("Upload took %.03f sec" % (time.time() - start))
     
     start = time.time()
     cmd = cmd.replace(files[0], files[0]+unique)
     r = run(id, cmd)
-    print "run took %.03f sec" % (time.time() - start)
+    print("run took %.03f sec" % (time.time() - start))
     if r is None:
-        print 'error'
+        print('error')
 
 if __name__=="__main__":
     main(sys.argv[1:])

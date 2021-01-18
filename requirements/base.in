@@ -1,14 +1,14 @@
-Django >= 1.4, < 1.5
+Django<2.3
 pika
-django_nose==1.4.1
+django_nose
 nosexcover
 rednose
-requests==2.22.0
-boto==2.6.0
-path.py==10.0
-dogstatsd-python==0.2.1
+requests
+boto
+path.py
+dogstatsd-python
 south
-anyjson==0.3.3
+anyjson
 numpy==1.6.2
 lxml==2.3.6
 newrelic==2.46.0.37

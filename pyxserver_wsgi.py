@@ -15,9 +15,9 @@ from statsd import statsd
 import sys
 from time import localtime, strftime, time
 
-import settings    # Not django, but do something similar
+from . import settings    # Not django, but do something similar
 
-from sandbox import sandbox
+from .sandbox import sandbox
 
 # make sure we can find the grader files
 sys.path.append(settings.GRADER_ROOT)
@@ -28,7 +28,7 @@ logging.config.dictConfig(settings.LOGGING)
 log = logging.getLogger("xserver." + __name__)
 
 
-results_template = u"""
+results_template = """
 <div class="test">
 <header>Test results</header>
   <section>
@@ -44,7 +44,7 @@ results_template = u"""
 """
 
 
-results_correct_template = u"""
+results_correct_template = """
   <div class="result-output result-correct">
     <h4>{short-description}</h4>
     <pre>{long-description}</pre>
@@ -58,7 +58,7 @@ results_correct_template = u"""
 """
 
 
-results_incorrect_template = u"""
+results_incorrect_template = """
   <div class="result-output result-incorrect">
     <h4>{short-description}</h4>
     <pre>{long-description}</pre>
@@ -78,15 +78,15 @@ def format_errors(errors):
     error_list = [esc(e) for e in errors or []]
     if error_list:
         try:
-            items = u'\n'.join([u'<li><pre>{0}</pre></li>\n'.format(e) for e in error_list])
-            error_string = u'<ul>\n{0}</ul>\n'.format(items)
-            error_string = u'<div class="result-errors">{0}</div>'.format(error_string)
+            items = '\n'.join([f'<li><pre>{e}</pre></li>\n' for e in error_list])
+            error_string = f'<ul>\n{items}</ul>\n'
+            error_string = f'<div class="result-errors">{error_string}</div>'
         except UnicodeDecodeError:
             # See http://wiki.python.org/moin/UnicodeDecodeError; this error happens in the above unicode encoding
             # because it's assuming str `e` is in ascii encoding; when it is in Unicode already it gets sad.
-            items = '\n'.join(['<li><pre>{0}</pre></li>\n'.format(e) for e in error_list])
-            error_string = '<ul>\n{0}</ul>\n'.format(items)
-            error_string = '<div class="result-errors">{0}</div>'.format(error_string)
+            items = '\n'.join([f'<li><pre>{e}</pre></li>\n' for e in error_list])
+            error_string = f'<ul>\n{items}</ul>\n'
+            error_string = f'<div class="result-errors">{error_string}</div>'
     return error_string
 
 
@@ -95,9 +95,9 @@ def to_dict(result):
     # TODO: replace with mako template
     esc = cgi.escape
     if result[1]:
-        long_desc = u'<p>{0}</p>'.format(esc(result[1]))
+        long_desc = '<p>{}</p>'.format(esc(result[1]))
     else:
-        long_desc = u''
+        long_desc = ''
     return {'short-description': esc(result[0]),
             'long-description': long_desc,
             'correct': result[2],   # Boolean; don't escape.
@@ -151,10 +151,10 @@ def do_POST(data):
         # However, for debugging, still want to see what the problem is
         statsd.increment('xserver.grader_payload_error')
 
-        log.debug("error parsing: '{0}' -- {1}".format(payload, err))
+        log.debug(f"error parsing: '{payload}' -- {err}")
         raise
 
-    log.debug("Processing submission, grader payload: {0}".format(payload))
+    log.debug(f"Processing submission, grader payload: {payload}")
     relative_grader_path = grader_config['grader']
     grader_path = os.path.join(settings.GRADER_ROOT, relative_grader_path)
     start = time()
@@ -187,13 +187,13 @@ def application(env, start_response):
         try:
             return do_POST(data)
         except:
-            log.exception("Error processing request: {0}".format(data))
+            log.exception(f"Error processing request: {data}")
             return None
 
     handlers = {'GET': do_GET,
                  'POST': post_wrapper,
                  }
-    if method in handlers.keys():
+    if method in list(handlers.keys()):
         reply = handlers[method](data)
 
         if reply is not None:

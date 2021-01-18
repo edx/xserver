@@ -16,7 +16,7 @@ def record_suspicious_submission(msg, code_str):
     logging to avoids need for more config changes (S3 credentials, python
     requirements).
     """
-    log.warning('Suspicious code: {0}, {1}'.format(msg, code_str))
+    log.warning(f'Suspicious code: {msg}, {code_str}')
 
 def sandbox_cmd_list():
     """

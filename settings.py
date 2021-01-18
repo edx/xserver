@@ -2,7 +2,7 @@
 
 import json
 import os
-from logsettings import get_logger_config
+from .logsettings import get_logger_config
 from path import Path
 import sys
 
@@ -29,7 +29,7 @@ DO_SANDBOXING = False
 # AWS
 
 if os.path.isfile(ENV_ROOT / "env.json"):
-    print "Opening env.json file"
+    print("Opening env.json file")
     with open(ENV_ROOT / "env.json") as env_file:
         ENV_TOKENS = json.load(env_file)
 
